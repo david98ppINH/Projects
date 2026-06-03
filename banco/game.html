@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Banco del Austro - Fan Fest Mundialista</title>
+  
+  <!-- Tailwind CSS para Estructura de Interfaz Rápida y Limpia -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tipografía Deportiva y Premium -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Iconos Modernos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Estilos globales y encapsulamiento bajo el prefijo único para evitar conflictos con GHL */
+    #austro-game-wrapper {
+      font-family: 'Montserrat', sans-serif;
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background: radial-gradient(circle at center, #102a4d 0%, #061224 100%);
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    /* Personalización del scroll de las tablas */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(13, 30, 54, 0.5);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #ffca28;
+      border-radius: 4px;
+    }
+
+    /* Brillos y animaciones de marca */
+    .brand-glow {
+      box-shadow: 0 0 20px rgba(255, 202, 40, 0.3);
+    }
+    .btn-austro-red {
+      background: linear-gradient(135deg, #d32f2f 0%, #9a1f1f 100%);
+      box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+      transition: all 0.2s ease;
+    }
+    .btn-austro-red:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 5px rgba(211, 47, 47, 0.2);
+    }
+    .btn-austro-gold {
+      background: linear-gradient(135deg, #ffca28 0%, #e5b310 100%);
+      box-shadow: 0 4px 15px rgba(255, 202, 40, 0.4);
+      color: #061224;
+      transition: all 0.2s ease;
+    }
+    .btn-austro-gold:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 5px rgba(255, 202, 40, 0.2);
+    }
+
+    /* Tarjetas adaptadas a pantallas gigantes */
+    .kiosk-card {
+      background: rgba(15, 34, 61, 0.95);
+      backdrop-filter: blur(10px);
+      border: 3px solid #ffca28;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Estilo del Canvas */
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Efecto de pulso para la marca */
+    @keyframes pulse-gold {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.9; }
+    }
+    .brand-pulse {
+      animation: pulse-gold 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="m-0 p-0 overflow-hidden bg-black">
+
+  <div id="austro-game-wrapper">
+    
+    <!-- Contenedor del Lienzo de Renderizado del Juego (p5.js) -->
+    <div id="canvas-container"></div>
+
+    <!-- PANTALLA 1: Formulario de Registro de Jugadores (Captura de Leads) -->
+    <div id="registration-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 transition-all duration-300">
+      <div class="kiosk-card w-full max-w-lg rounded-2xl p-6 md:p-8 text-white">
+        <div class="text-center mb-6">
+          <div class="bg-white rounded-lg p-3 inline-block mb-3 brand-pulse">
+            <!-- Logotipo conceptual de Banco del Austro -->
+            <span class="text-blue-900 font-extrabold text-2xl tracking-tight">BANCO DEL <span class="text-red-600">AUSTRO</span></span>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-black text-[#ffca28] tracking-wider uppercase">MUNDIAL FAN FEST</h2>
+          <p class="text-gray-300 text-sm md:text-base font-semibold mt-1">Registra tus datos, juega y gana grandes premios</p>
+        </div>
+
+        <form id="austro-reg-form" onsubmit="processRegistration(event)" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Nombre</label>
+              <div class="relative">
+                <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-user"></i></span>
+                <input type="text" id="reg-firstname" required placeholder="Nombre" 
+                  class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Apellido</label>
+              <div class="relative">
+                <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-signature"></i></span>
+                <input type="text" id="reg-lastname" required placeholder="Apellido" 
+                  class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Cédula de Identidad</label>
+            <div class="relative">
+              <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-id-card"></i></span>
+              <input type="text" id="reg-id" required placeholder="Ej: 0102030405" pattern="[0-9]{10}" title="Por favor ingrese una cédula ecuatoriana válida de 10 dígitos"
+                class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Correo Electrónico</label>
+            <div class="relative">
+              <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-envelope"></i></span>
+              <input type="email" id="reg-email" required placeholder="correo@ejemplo.com" 
+                class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Teléfono Celular</label>
+            <div class="relative">
+              <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-phone"></i></span>
+              <input type="tel" id="reg-phone" required placeholder="Ej: 0999999999" pattern="[0-9]{10}" title="Ingrese un número de celular de 10 dígitos"
+                class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full btn-austro-gold py-3.5 rounded-lg font-black tracking-widest text-lg uppercase mt-2">
+            REGISTRARSE Y JUGAR <i class="fa-solid fa-futbol ml-1"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PANTALLA 2: Menú de Selección de Juego -->
+    <div id="menu-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden transition-all duration-300">
+      <div class="kiosk-card w-full max-w-xl rounded-2xl p-8 text-white text-center">
+        <h2 class="text-3xl font-black text-[#ffca28] tracking-widest mb-2 uppercase">SELECCIONA TU DESAFÍO</h2>
+        <p class="text-gray-300 font-semibold mb-8 text-sm md:text-base">Demuestra tus habilidades frente a toda la hinchada</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Tarjeta Juego 1 -->
+          <div onclick="selectGameMode('PENALTY')" class="cursor-pointer bg-gradient-to-br from-[#122849] to-[#0a172b] border-2 border-red-600 hover:border-[#ffca28] p-6 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200">
+            <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-shoe-prints text-2xl text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#ffca28] mb-2 uppercase">Penales de Oro</h3>
+            <p class="text-xs text-gray-300 leading-relaxed">Arrastra el dedo en la pantalla para patear el penal, esquiva la estirada del arquero y anota.</p>
+          </div>
+
+          <!-- Tarjeta Juego 2 -->
+          <div onclick="selectGameMode('KEEPIE')" class="cursor-pointer bg-gradient-to-br from-[#122849] to-[#0a172b] border-2 border-yellow-600 hover:border-red-500 p-6 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200">
+            <div class="w-16 h-16 bg-[#ffca28] rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-futbol text-2xl text-[#061224]"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2 uppercase">Dominadas Tricolor</h3>
+            <p class="text-xs text-gray-300 leading-relaxed">Toca repetidamente el balón antes de que toque el césped para mantenerlo en el aire.</p>
+          </div>
+        </div>
+
+        <button onclick="startFreshSession()" class="mt-8 text-sm text-[#ffca28] hover:underline uppercase font-bold tracking-wider">
+          <i class="fa-solid fa-arrow-left-long mr-2"></i> Registrar otro jugador
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: Pantalla de Carga y Sincronización -->
+    <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden bg-[#061224]/90">
+      <div class="text-center text-white">
+        <div class="w-20 h-20 border-8 border-slate-700 border-t-[#ffca28] rounded-full animate-spin mx-auto mb-6"></div>
+        <h3 id="loading-text" class="text-2xl font-black tracking-widest text-[#ffca28] uppercase">Procesando datos mundialistas...</h3>
+        <p class="text-gray-400 mt-2 font-semibold">Conectando con el CRM de Banco del Austro</p>
+      </div>
+    </div>
+
+    <!-- PANTALLA 4: Leaderboard en Tiempo Real -->
+    <div id="leaderboard-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden">
+      <div class="kiosk-card w-full max-w-2xl rounded-2xl p-6 md:p-8 text-white">
+        <div class="text-center mb-6">
+          <i class="fa-solid fa-trophy text-4xl text-[#ffca28] mb-3 animate-bounce"></i>
+          <h2 id="leaderboard-title" class="text-3xl font-black text-[#ffca28] tracking-widest uppercase">TABLA DE POSICIONES</h2>
+          <p class="text-gray-300 text-sm font-semibold">Los mejores goleadores del Fan Fest</p>
+        </div>
+
+        <div class="table-scroll-container overflow-hidden rounded-xl border border-slate-800 bg-[#091526]/80 mb-6">
+          <div class="max-h-60 overflow-y-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-[#10233c] text-[#ffca28] text-xs md:text-sm uppercase font-extrabold tracking-wider">
+                  <th class="py-3 px-6 text-center w-16">Pos.</th>
+                  <th class="py-3 px-6">Jugador</th>
+                  <th class="py-3 px-6 text-center w-32">Récord</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-rows" class="text-sm md:text-base font-semibold divide-y divide-slate-800">
+                <!-- Se poblará dinámicamente con JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <button onclick="returnToMenu()" class="btn-austro-red py-3.5 rounded-lg font-black tracking-wider text-sm uppercase">
+            <i class="fa-solid fa-gamepad mr-1"></i> Cambiar Juego
+          </button>
+          <button onclick="startFreshSession()" class="btn-austro-gold py-3.5 rounded-lg font-black tracking-wider text-sm uppercase">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Siguiente Turno
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Biblioteca de Animaciones y Renderizado p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+
+  <script>
+    // ==========================================
+    // CONFIGURACIÓN DE CONECTIVIDAD GHL & PROXY
+    // ==========================================
+    // URL del microservicio seguro (Vercel Serverless Function)
+    const SECURE_PROXY_URL = 'https://austro-mundial-proxy.vercel.app'; 
+    
+    // Variables globales de control del jugador y juego
+    let playerProfile = null;
+    let activeGameMode = null; // 'PENALTY' o 'KEEPIE'
+    let currentSessionScore = 0;
+    let penaltyAttempts = 0;
+    const maxPenaltyAttempts = 5;
+
+    // Variables de motor físico y estado en p5.js
+    let gameEngineState = 'UNINITIALIZED';
+    let ball, goalie, swipeStart;
+    let isDragging = false;
+    let displayMessage = "";
+    let displayMessageTimer = 0;
+
+    // Base de datos simulada local en memoria para robustez total sin conexión (Fallback Offline)
+    let localLeaderboard = {
+      penalty: [
+        { firstName: 'Marcelo', lastName: 'E.', score: 5 },
+        { firstName: 'Andrés', lastName: 'C.', score: 4 },
+        { firstName: 'Esteban', lastName: 'M.', score: 4 },
+        { firstName: 'Santiago', lastName: 'V.', score: 3 },
+        { firstName: 'Xavier', lastName: 'A.', score: 3 },
+        { firstName: 'Cristian', lastName: 'P.', score: 2 }
+      ],
+      keepie: [
+        { firstName: 'Gabriela', lastName: 'T.', score: 18 },
+        { firstName: 'Carlos', lastName: 'Z.', score: 15 },
+        { firstName: 'Esteban', lastName: 'M.', score: 12 },
+        { firstName: 'Andrés', lastName: 'C.', score: 11 },
+        { firstName: 'Luis', lastName: 'G.', score: 8 },
+        { firstName: 'Paola', lastName: 'R.', score: 5 }
+      ]
+    };
+
+    // ==========================================
+    // INICIALIZACIÓN Y MOTOR DE RENDER (p5.js)
+    // ==========================================
+    function setup() {
+      const container = document.getElementById('canvas-container');
+      const canvas = createCanvas(container.clientWidth, container.clientHeight);
+      canvas.parent('canvas-container');
+      canvas.style('display', 'block');
+      
+      resetBallPhysics();
+      resetGoalieAI();
+      gameEngineState = 'PLAYING';
+    }
+
+    function draw() {
+      if (activeGameMode === null) {
+        // Renderizar un estadio en reposo cuando no se está jugando
+        drawStadiumPitch(false);
+        drawAmbientStadiumGlow();
+        return;
+      }
+
+      // Dibujar estadio interactivo y elementos específicos de cada modo
+      drawStadiumPitch(true);
+
+      if (activeGameMode === 'PENALTY') {
+        drawGoalPost();
+        drawGoalie();
+        updateBallPenaltyPhysics();
+        drawSoccerBall();
+        drawDragTrajectory();
+      } else if (activeGameMode === 'KEEPIE') {
+        updateKeepiePhysics();
+        drawSoccerBall();
+      }
+
+      drawScoreHUD();
+      drawGameMessages();
+    }
+
+    // ==========================================
+    // CAPA ESTÉTICA Y GRÁFICOS VECTORIALES
+    // ==========================================
+    function drawStadiumPitch(activeGame) {
+      background('#061224'); // Color de fondo base
+
+      // Dibujo de las gradas y el graderío estilizado
+      noStroke();
+      fill('#0d213a');
+      rect(0, 0, width, height * 0.4);
+      
+      // Gradas traseras en perspectiva
+      fill('#09172b');
+      quad(0, height * 0.4, width, height * 0.4, width, height * 0.42, 0, height * 0.42);
+
+      // Línea de luces de fondo (Glow de Estadio)
+      stroke('rgba(255, 202, 40, 0.15)');
+      strokeWeight(40);
+      line(0, height * 0.25, width, height * 0.25);
+
+      // Publicidad estática en la cancha del Banco del Austro
+      noStroke();
+      fill('#102a4d');
+      rect(0, height * 0.38, width, height * 0.05);
+      
+      // Texto de publicidad
+      fill('#ffca28');
+      textSize(constrain(width * 0.02, 12, 28));
+      textAlign(CENTER, CENTER);
+      textStyle(BOLD);
+      text("★ BANCO DEL AUSTRO ★   APOYANDO A LA TRI   ★   FAN FEST MUNDIALISTA ★", width / 2, height * 0.405);
+
+      // Terreno de juego (Césped Verde Azulado Premium)
+      let greenColor = activeGame ? '#0f3a20' : '#072412';
+      fill(greenColor);
+      noStroke();
+      quad(0, height, width, height, width, height * 0.43, 0, height * 0.43);
+
+      // Líneas de cal reglamentarias (Área grande)
+      stroke('rgba(255,255,255,0.15)');
+      strokeWeight(3);
+      noFill();
+      quad(width * 0.05, height, width * 0.95, height, width * 0.8, height * 0.43, width * 0.2, height * 0.43);
+
+      // Punto penal (Círculo blanco)
+      if (activeGameMode === 'PENALTY') {
+        fill('rgba(255, 255, 255, 0.8)');
+        noStroke();
+        ellipse(width / 2, height * 0.85, width * 0.025, width * 0.012);
+      }
+    }
+
+    function drawAmbientStadiumGlow() {
+      // Efectos de luces circulares abstractos de fondo
+      fill('rgba(255, 202, 40, 0.03)');
+      noStroke();
+      ellipse(width / 2, height / 2, sin(frameCount * 0.02) * width * 0.4 + width * 0.5);
+    }
+
+    function drawGoalPost() {
+      // Dibujar la estructura de la portería 2.5D
+      stroke('#ffffff');
+      strokeWeight(width * 0.012);
+      noFill();
+      rect(width * 0.2, height * 0.2, width * 0.6, height * 0.35, 4);
+
+      // Dibujar la red
+      stroke('rgba(255,255,255,0.08)');
+      strokeWeight(1.5);
+      let stepX = (width * 0.6) / 25;
+      let stepY = (height * 0.35) / 15;
+      
+      // Líneas verticales de la red
+      for (let i = 0; i <= 25; i++) {
+        let x = width * 0.2 + i * stepX;
+        line(x, height * 0.2, x, height * 0.55);
+      }
+      // Líneas horizontales de la red
+      for (let j = 0; j <= 15; j++) {
+        let y = height * 0.2 + j * stepY;
+        line(width * 0.2, y, width * 0.8, y);
+      }
+    }
+
+    function drawGoalie() {
+      // Dibujar al arquero con look premium animado
+      push();
+      translate(goalie.x, goalie.y);
+
+      // Sombra del portero
+      fill(0, 0, 0, 70);
+      noStroke();
+      ellipse(0, goalie.height * 0.5, goalie.width * 1.5, goalie.height * 0.3);
+
+      // Cuerpo / Uniforme (Arquero Banco del Austro en Rojo)
+      fill('#d32f2f');
+      stroke('#ffffff');
+      strokeWeight(3);
+      rectMode(CENTER);
+      rect(0, 0, goalie.width, goalie.height, 12);
+
+      // Guantes de portero (Amarillos)
+      fill('#ffca28');
+      ellipse(-goalie.width * 0.7, -goalie.height * 0.1, goalie.width * 0.35);
+      ellipse(goalie.width * 0.7, -goalie.height * 0.1, goalie.width * 0.35);
+
+      // Cabeza
+      fill('#ffcc80');
+      stroke('#ffffff');
+      ellipse(0, -goalie.height * 0.7, goalie.width * 0.5);
+
+      // Cintillo / Cabellera estilizada
+      fill('#1e293b');
+      rect(0, -goalie.height * 0.9, goalie.width * 0.4, goalie.height * 0.2, 3);
+
+      pop();
+      rectMode(CORNER);
+    }
+
+    function drawSoccerBall() {
+      push();
+      // Escalar la pelota de forma hiperbólica para un efecto tridimensional 2.5D
+      let scaleFactor = 1 / (1 + ball.z * 1.6);
+      ball.renderRadius = ball.baseRadius * scaleFactor;
+
+      translate(ball.x, ball.y);
+
+      // Sombra dinámica de la pelota proyectada en el suelo
+      let shadowOffset = ball.z * 40;
+      fill(0, 0, 0, constrain(120 - ball.z * 80, 0, 120));
+      noStroke();
+      ellipse(0, ball.renderRadius + shadowOffset, ball.renderRadius * 1.8 * scaleFactor, ball.renderRadius * 0.4 * scaleFactor);
+
+      // Cuerpo del balón de fútbol
+      fill('#ffffff');
+      stroke('#091526');
+      strokeWeight(constrain(3 * scaleFactor, 1.5, 4));
+      ellipse(0, 0, ball.renderRadius * 2);
+
+      // Gajos hexagonales negros simplificados
+      fill('#091526');
+      noStroke();
+      ellipse(0, 0, ball.renderRadius * 0.5);
+      
+      // Pentágonos a los lados para dar volumen curvo
+      ellipse(-ball.renderRadius * 0.6, -ball.renderRadius * 0.4, ball.renderRadius * 0.3);
+      ellipse(ball.renderRadius * 0.6, -ball.renderRadius * 0.4, ball.renderRadius * 0.3);
+      ellipse(-ball.renderRadius * 0.6, ball.renderRadius * 0.4, ball.renderRadius * 0.3);
+      ellipse(ball.renderRadius * 0.6, ball.renderRadius * 0.4, ball.renderRadius * 0.3);
+      ellipse(0, -ball.renderRadius * 0.7, ball.renderRadius * 0.3);
+      ellipse(0, ball.renderRadius * 0.7, ball.renderRadius * 0.3);
+
+      pop();
+    }
+
+    function drawDragTrajectory() {
+      // Si el usuario está realizando un tiro, dibujar trayectoria proyectada
+      if (isDragging && swipeStart) {
+        stroke('rgba(255, 202, 40, 0.6)');
+        strokeWeight(6);
+        line(swipeStart.x, swipeStart.y, mouseX, mouseY);
+        
+        fill('#ffca28');
+        noStroke();
+        ellipse(mouseX, mouseY, 15);
+      }
+    }
+
+    function drawScoreHUD() {
+      // Elementos de pantalla informativos (HUD) gigantes para TV
+      noStroke();
+      fill('rgba(15, 34, 61, 0.85)');
+      rect(15, 15, width < 600 ? 160 : 260, 80, 10);
+      
+      fill('#ffca28');
+      textSize(width < 600 ? 14 : 18);
+      textAlign(LEFT, TOP);
+      textStyle(BOLD);
+      text(`JUGADOR: ${playerProfile ? playerProfile.firstName : 'Invitado'}`, 25, 25);
+      
+      fill('#ffffff');
+      textSize(width < 600 ? 18 : 24);
+      text(`PUNTOS: ${currentSessionScore}`, 25, 45);
+
+      if (activeGameMode === 'PENALTY') {
+        fill('rgba(15, 34, 61, 0.85)');
+        rect(width - (width < 600 ? 130 : 180), 15, width < 600 ? 115 : 165, 80, 10);
+        
+        fill('#ff5252');
+        textSize(width < 600 ? 13 : 16);
+        textAlign(RIGHT, TOP);
+        text("DISPAROS", width - 25, 25);
+        
+        fill('#ffffff');
+        textSize(width < 600 ? 22 : 28);
+        text(`${penaltyAttempts} / ${maxPenaltyAttempts}`, width - 25, 42);
+      }
+    }
+
+    function drawGameMessages() {
+      if (displayMessageTimer > 0) {
+        push();
+        textAlign(CENTER, CENTER);
+        textSize(constrain(width * 0.08, 28, 80));
+        textStyle(BOLD);
+        
+        // Sombra de texto
+        fill(0, 0, 0, 150);
+        text(displayMessage, width / 2 + 4, height * 0.45 + 4);
+        
+        // Texto principal
+        let msgColor = displayMessage.includes("GOL") ? '#ffca28' : '#ff3d3d';
+        if (displayMessage.includes("TOQUE")) msgColor = '#4caf50';
+        
+        fill(msgColor);
+        text(displayMessage, width / 2, height * 0.45);
+        pop();
+        displayMessageTimer--;
+      }
+    }
+
+    // ==========================================
+    // FÍSICA DE JUEGOS Y CONTROL INTELIGENTE
+    // ==========================================
+    function resetBallPhysics() {
+      ball = {
+        x: width / 2,
+        y: height * 0.85,
+        z: 0,
+        vx: 0,
+        vy: 0,
+        vz: 0,
+        baseRadius: constrain(width * 0.045, 20, 50),
+        renderRadius: constrain(width * 0.045, 20, 50),
+        isKicked: false
+      };
+    }
+
+    function resetGoalieAI() {
+      goalie = {
+        x: width / 2,
+        y: height * 0.35,
+        targetX: width / 2,
+        targetY: height * 0.35,
+        width: constrain(width * 0.09, 50, 110),
+        height: constrain(height * 0.12, 60, 110),
+        agility: 0.12,
+        state: 'IDLE' // IDLE, DIVING
+      };
+    }
+
+    function updateBallPenaltyPhysics() {
+      if (!ball.isKicked) return;
+
+      // El juego de penales opera en coordenadas 2.5D simulando profundidad en Z
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      ball.z += ball.vz;
+      ball.vy += 0.32; // Gravedad artificial constante
+
+      // Movimiento autónomo de reacción del portero
+      if (goalie.state === 'DIVING') {
+        goalie.x = lerp(goalie.x, goalie.targetX, goalie.agility);
+        goalie.y = lerp(goalie.y, goalie.targetY, goalie.agility);
+      }
+
+      // El balón llega al plano de la red / línea de meta
+      if (ball.z >= 1.0) {
+        ball.isKicked = false;
+        evaluatePenaltyResult();
+      }
+    }
+
+    function updateKeepiePhysics() {
+      // El juego de dominadas funciona en plano puramente 2D
+      ball.y += ball.vy;
+      ball.x += ball.vx;
+      ball.vy += 0.42; // Gravedad acelerada
+
+      // Rebotes naturales contra los límites izquierdo/derecho del estadio
+      if (ball.x - ball.renderRadius < 0 || ball.x + ball.renderRadius > width) {
+        ball.vx *= -0.8;
+        ball.x = constrain(ball.x, ball.renderRadius, width - ball.renderRadius);
+      }
+
+      // Si la pelota desciende por debajo de la línea límite inferior
+      if (ball.y > height * 0.95) {
+        activeGameMode = null;
+        triggerMessage("¡FIN DEL JUEGO!");
+        setTimeout(() => {
+          endGameSession();
+        }, 1200);
+      }
+    }
+
+    function evaluatePenaltyResult() {
+      let gLeft = width * 0.2;
+      let gRight = width * 0.8;
+      let gTop = height * 0.2;
+      let gBottom = height * 0.55;
+
+      // Cálculo de distancia radial con respecto al portero para intercepción
+      let hitGoalie = dist(ball.x, ball.y, goalie.x, goalie.y);
+
+      if (hitGoalie < goalie.width * 0.8) {
+        triggerMessage("¡ATAJADA!");
+      } else if (ball.x > gLeft && ball.x < gRight && ball.y > gTop && ball.y < gBottom) {
+        triggerMessage("¡GOLAZO!");
+        currentSessionScore++;
+      } else {
+        triggerMessage("¡FUERA!");
+      }
+
+      penaltyAttempts++;
+
+      setTimeout(() => {
+        if (penaltyAttempts >= maxPenaltyAttempts) {
+          endGameSession();
+        } else {
+          resetBallPhysics();
+          resetGoalieAI();
+        }
+      }, 1400);
+    }
+
+    function triggerMessage(msg) {
+      displayMessage = msg;
+      displayMessageTimer = 65; // Mostrar por aprox 1 segundo a 60 FPS
+    }
+
+    // ==========================================
+    // EVENTOS DE ENTRADA TÁCTIL (MÓVIL Y SMART TV)
+    // ==========================================
+    function touchStarted() {
+      if (activeGameMode === null) return false;
+
+      if (activeGameMode === 'PENALTY' && !ball.isKicked) {
+        swipeStart = createVector(mouseX, mouseY);
+        isDragging = true;
+      } else if (activeGameMode === 'KEEPIE') {
+        let touchDistance = dist(mouseX, mouseY, ball.x, ball.y);
+        // Margen ampliado para facilitar el toque en pantallas gigantes de TV
+        let hitMargin = ball.renderRadius * 1.8;
+        
+        if (touchDistance <= hitMargin) {
+          // El toque inyecta velocidad ascendente (negativa en Y)
+          ball.vy = -constrain(height * 0.015, 12, 22);
+          
+          // Desvío en el eje X para dar efecto y movimiento inercial
+          let xDeviation = (ball.x - mouseX) * 0.3;
+          ball.vx = constrain(xDeviation, -8, 8);
+          
+          currentSessionScore++;
+          triggerMessage("¡TOQUE!");
+        }
+      }
+      return false; // Prevenir comportamientos por defecto del navegador en Kiosco
+    }
+
+    function touchEnded() {
+      if (activeGameMode === 'PENALTY' && isDragging) {
+        isDragging = false;
+        let swipeEnd = createVector(mouseX, mouseY);
+        let swipeVector = p5.Vector.sub(swipeEnd, swipeStart);
+
+        // Umbral mínimo de recorrido para validez del tiro
+        if (swipeVector.mag() > 25 && swipeEnd.y < swipeStart.y) {
+          ball.vx = swipeVector.x * 0.055;
+          ball.vy = (swipeEnd.y - swipeStart.y) * 0.082;
+          ball.vz = 0.038; // Velocidad de alejamiento 2.5D
+          ball.isKicked = true;
+
+          // Estirada dinámica de la IA del arquero orientada a interceptar la pelota
+          goalie.targetX = constrain(swipeEnd.x, width * 0.22, width * 0.78);
+          goalie.targetY = constrain(swipeEnd.y * 0.7, height * 0.22, height * 0.48);
+          goalie.state = 'DIVING';
+        }
+      }
+      return false;
+    }
+
+    // Mapeo automático de eventos Mouse para pruebas locales ágiles
+    function mousePressed() {
+      return touchStarted();
+    }
+
+    function mouseReleased() {
+      return touchEnded();
+    }
+
+    function windowResized() {
+      const container = document.getElementById('canvas-container');
+      resizeCanvas(container.clientWidth, container.clientHeight);
+      resetBallPhysics();
+      resetGoalieAI();
+    }
+
+    // ==========================================
+    // GESTIÓN DE FLUJO DE INTERFAZ Y CRM
+    // ==========================================
+    function processRegistration(event) {
+      event.preventDefault();
+      
+      const payload = {
+        firstName: document.getElementById('reg-firstname').value,
+        lastName: document.getElementById('reg-lastname').value,
+        email: document.getElementById('reg-email').value,
+        phone: document.getElementById('reg-phone').value,
+        identificacion: document.getElementById('reg-id').value
+      };
+
+      // Control de pantalla de carga
+      document.getElementById('registration-overlay').classList.add('hidden');
+      const loader = document.getElementById('loading-overlay');
+      const loadingText = document.getElementById('loading-text');
+      loadingText.innerText = "Registrando datos del participante...";
+      loader.classList.remove('hidden');
+
+      // Intentar sincronización con el proxy en la nube
+      fetch(`${SECURE_PROXY_URL}/api/player`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error de conexión con el proxy');
+        return res.json();
+      })
+      .then(data => {
+        playerProfile = data.contact;
+        loader.classList.add('hidden');
+        document.getElementById('menu-overlay').classList.remove('hidden');
+      })
+      .catch(err => {
+        console.warn('Operando en modo local por desconexión del servidor:', err);
+        // Modo local robusto para evitar colapsos durante el evento físico en el estadio
+        playerProfile = {
+          id: 'local_' + Date.now(),
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          email: payload.email,
+          identificacion: payload.identificacion
+        };
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          document.getElementById('menu-overlay').classList.remove('hidden');
+        }, 800);
+      });
+    }
+
+    function selectGameMode(mode) {
+      activeGameMode = mode;
+      currentSessionScore = 0;
+      penaltyAttempts = 0;
+      
+      document.getElementById('menu-overlay').classList.add('hidden');
+      resetBallPhysics();
+      resetGoalieAI();
+      gameEngineState = 'PLAYING';
+    }
+
+    function endGameSession() {
+      const gameTypeKey = activeGameMode === 'PENALTY' ? 'penalty' : 'keepie';
+      activeGameMode = null;
+      
+      const loader = document.getElementById('loading-overlay');
+      const loadingText = document.getElementById('loading-text');
+      loadingText.innerText = "Sincronizando récord en GoHighLevel...";
+      loader.classList.remove('hidden');
+
+      const scorePayload = {
+        contactId: playerProfile.id,
+        identificacion: playerProfile.identificacion,
+        score: currentSessionScore,
+        gameType: gameTypeKey
+      };
+
+      // Intentar subir la puntuación al CRM
+      fetch(`${SECURE_PROXY_URL}/api/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scorePayload)
+      })
+      .then(() => fetchLeaderboard(gameTypeKey))
+      .catch(err => {
+        console.warn('Utilizando persistencia local para almacenamiento de puntajes:', err);
+        
+        // Guardado local si hay error de conectividad
+        localLeaderboard[gameTypeKey].push({
+          firstName: playerProfile.firstName,
+          lastName: playerProfile.lastName.charAt(0) + '.',
+          score: currentSessionScore
+        });
+        // Reordenar localmente descendente
+        localLeaderboard[gameTypeKey].sort((a, b) => b.score - a.score);
+        
+        setTimeout(() => {
+          renderLeaderboardView(localLeaderboard[gameTypeKey], gameTypeKey);
+        }, 800);
+      });
+    }
+
+    function fetchLeaderboard(gameType) {
+      document.getElementById('loading-text').innerText = "Cargando tabla de clasificación...";
+      
+      fetch(`${SECURE_PROXY_URL}/api/leaderboard?game=${gameType}`)
+      .then(res => res.json())
+      .then(data => {
+        renderLeaderboardView(data.leaderboard, gameType);
+      })
+      .catch(err => {
+        console.warn('Cargando datos locales de la tabla:', err);
+        renderLeaderboardView(localLeaderboard[gameType], gameType);
+      });
+    }
+
+    function renderLeaderboardView(records, gameType) {
+      const rowsContainer = document.getElementById('leaderboard-rows');
+      rowsContainer.innerHTML = '';
+      
+      document.getElementById('leaderboard-title').innerText = 
+        gameType === 'penalty' ? "LÍDERES DE PENALES" : "LÍDERES DE DOMINADAS";
+
+      records.slice(0, 10).forEach((record, index) => {
+        const medalIcon = index === 0 ? '🏆' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : ''));
+        const row = document.createElement('tr');
+        row.className = index < 3 ? 'bg-[#ffca28]/10 text-white' : 'hover:bg-slate-800/40 text-slate-300';
+        row.innerHTML = `
+          <td class="py-3 px-6 text-center font-bold text-[#ffca28]">${index + 1} ${medalIcon}</td>
+          <td class="py-3 px-6 font-bold">${record.firstName} ${record.lastName}</td>
+          <td class="py-3 px-6 text-center font-black text-[#ffca28] text-lg">${record.score}</td>
+        `;
+        rowsContainer.appendChild(row);
+      });
+
+      document.getElementById('loading-overlay').classList.add('hidden');
+      document.getElementById('leaderboard-overlay').classList.remove('hidden');
+    }
+
+    function returnToMenu() {
+      document.getElementById('leaderboard-overlay').classList.add('hidden');
+      document.getElementById('menu-overlay').classList.remove('hidden');
+    }
+
+    function startFreshSession() {
+      playerProfile = null;
+      document.getElementById('austro-reg-form').reset();
+      document.getElementById('leaderboard-overlay').classList.add('hidden');
+      document.getElementById('registration-overlay').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
