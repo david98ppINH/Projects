@@ -9,23 +9,49 @@
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Tipografía Deportiva y Premium -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Iconos Modernos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- HubSpot Forms Embed JS -->
+  <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/embed/v2.js"></script>
+
   <style>
     /* Estilos globales y encapsulamiento bajo el prefijo único para evitar conflictos con GHL */
+    /* Bloqueo estricto de gestos y comportamiento táctil nativo para Tótems */
+    * {
+      touch-action: manipulation;
+      -webkit-user-drag: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+      overscroll-behavior-x: none;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    /* Estilos globales y encapsulamiento bajo el prefijo único para evitar conflictos con GHL */
     #austro-game-wrapper {
-      font-family: 'Montserrat', sans-serif;
+      font-family: 'Assistant', sans-serif;
       position: relative;
       width: 100%;
       height: 100vh;
-      background: radial-gradient(circle at center, #102a4d 0%, #061224 100%);
+      background: radial-gradient(circle at center, #ffffff 0%, #f0f2f5 100%);
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
+      overscroll-behavior: none;
     }
 
     /* Personalización del scroll de las tablas */
@@ -33,47 +59,50 @@
       width: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(13, 30, 54, 0.5);
+      background: rgba(0, 32, 91, 0.1);
       border-radius: 4px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #ffca28;
+      background: #ffb81c;
       border-radius: 4px;
     }
 
     /* Brillos y animaciones de marca */
     .brand-glow {
-      box-shadow: 0 0 20px rgba(255, 202, 40, 0.3);
+      box-shadow: 0 0 20px rgba(255, 184, 28, 0.4);
     }
     .btn-austro-red {
-      background: linear-gradient(135deg, #d32f2f 0%, #9a1f1f 100%);
-      box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+      background: linear-gradient(135deg, #e4002b 0%, #ba0023 100%);
+      box-shadow: 0 4px 15px rgba(228, 0, 43, 0.3);
+      color: #ffffff;
       transition: all 0.2s ease;
     }
     .btn-austro-red:active {
       transform: scale(0.97);
-      box-shadow: 0 2px 5px rgba(211, 47, 47, 0.2);
+      box-shadow: 0 2px 5px rgba(228, 0, 43, 0.2);
     }
     .btn-austro-gold {
-      background: linear-gradient(135deg, #ffca28 0%, #e5b310 100%);
-      box-shadow: 0 4px 15px rgba(255, 202, 40, 0.4);
-      color: #061224;
+      background: linear-gradient(135deg, #ffb81c 0%, #e5a010 100%);
+      box-shadow: 0 4px 15px rgba(255, 184, 28, 0.3);
+      color: #00205b;
       transition: all 0.2s ease;
     }
     .btn-austro-gold:active {
       transform: scale(0.97);
-      box-shadow: 0 2px 5px rgba(255, 202, 40, 0.2);
+      box-shadow: 0 2px 5px rgba(255, 184, 28, 0.2);
     }
 
     /* Tarjetas adaptadas a pantallas gigantes */
     .kiosk-card {
-      background: rgba(15, 34, 61, 0.95);
-      backdrop-filter: blur(10px);
-      border: 3px solid #ffca28;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 32, 91, 0.1);
+      border-top: 4px solid #e4002b;
+      box-shadow: 0 20px 50px rgba(0, 32, 91, 0.15);
+      color: #00205b;
     }
 
-    /* Estilo del Canvas */
+    /* Estilo del Canvas - Canvas lógico de baja densidad centrado y escalado por CSS */
     #canvas-container {
       width: 100%;
       height: 100%;
@@ -81,19 +110,35 @@
       top: 0;
       left: 0;
       z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f2f5;
+      overflow: hidden;
+    }
+
+    #canvas-container canvas {
+      width: auto !important;
+      height: 100% !important;
+      aspect-ratio: 9/16;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transform: translate3d(0, 0, 0); /* Aceleración por hardware */
+      box-shadow: 0 10px 40px rgba(0, 32, 91, 0.08);
     }
 
     /* Efecto de pulso para la marca */
-    @keyframes pulse-gold {
+    @keyframes pulse-brand {
       0%, 100% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.03); opacity: 0.9; }
     }
     .brand-pulse {
-      animation: pulse-gold 3s infinite ease-in-out;
+      animation: pulse-brand 3s infinite ease-in-out;
     }
   </style>
 </head>
-<body class="m-0 p-0 overflow-hidden bg-black">
+<body class="m-0 p-0 overflow-hidden bg-[#f0f2f5] overscroll-none select-none">
 
   <div id="austro-game-wrapper">
     
@@ -102,131 +147,97 @@
 
     <!-- PANTALLA 1: Formulario de Registro de Jugadores (Captura de Leads) -->
     <div id="registration-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 transition-all duration-300">
-      <div class="kiosk-card w-full max-w-lg rounded-2xl p-6 md:p-8 text-white">
+      <div class="kiosk-card w-full max-w-lg rounded-2xl p-6 md:p-8">
         <div class="text-center mb-6">
-          <div class="bg-white rounded-lg p-3 inline-block mb-3 brand-pulse">
+          <div class="bg-[#f8fafc] border border-slate-200 rounded-lg p-3 inline-block mb-3 brand-pulse shadow-sm">
             <!-- Logotipo conceptual de Banco del Austro -->
-            <span class="text-blue-900 font-extrabold text-2xl tracking-tight">BANCO DEL <span class="text-red-600">AUSTRO</span></span>
+            <span class="text-[#00205b] font-extrabold text-2xl tracking-tight">BANCO DEL <span class="text-[#e4002b]">AUSTRO</span></span>
           </div>
-          <h2 class="text-2xl md:text-3xl font-black text-[#ffca28] tracking-wider uppercase">MUNDIAL FAN FEST</h2>
-          <p class="text-gray-300 text-sm md:text-base font-semibold mt-1">Registra tus datos, juega y gana grandes premios</p>
+          <h2 class="text-2xl md:text-3xl font-black text-[#00205b] tracking-wider uppercase">MUNDIAL FAN FEST</h2>
+          <p class="text-[#00205b] text-sm md:text-base font-semibold mt-1">Registra tus datos, juega y gana grandes premios</p>
         </div>
 
-        <form id="austro-reg-form" onsubmit="processRegistration(event)" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Nombre</label>
-              <div class="relative">
-                <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-user"></i></span>
-                <input type="text" id="reg-firstname" required placeholder="Nombre" 
-                  class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Apellido</label>
-              <div class="relative">
-                <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-signature"></i></span>
-                <input type="text" id="reg-lastname" required placeholder="Apellido" 
-                  class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Cédula de Identidad</label>
-            <div class="relative">
-              <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-id-card"></i></span>
-              <input type="text" id="reg-id" required placeholder="Ej: 0102030405" pattern="[0-9]{10}" title="Por favor ingrese una cédula ecuatoriana válida de 10 dígitos"
-                class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Correo Electrónico</label>
-            <div class="relative">
-              <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-envelope"></i></span>
-              <input type="email" id="reg-email" required placeholder="correo@ejemplo.com" 
-                class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase font-extrabold text-[#ffca28] mb-1">Teléfono Celular</label>
-            <div class="relative">
-              <span class="absolute left-3 top-3.5 text-gray-400"><i class="fa-solid fa-phone"></i></span>
-              <input type="tel" id="reg-phone" required placeholder="Ej: 0999999999" pattern="[0-9]{10}" title="Ingrese un número de celular de 10 dígitos"
-                class="w-full pl-9 pr-4 py-2.5 bg-[#091526] border border-slate-700 rounded-lg text-white font-semibold focus:outline-none focus:border-[#ffca28] text-sm md:text-base">
-            </div>
-          </div>
-
-          <button type="submit" class="w-full btn-austro-gold py-3.5 rounded-lg font-black tracking-widest text-lg uppercase mt-2">
-            REGISTRARSE Y JUGAR <i class="fa-solid fa-futbol ml-1"></i>
-          </button>
-        </form>
+        <!-- Contenedor del Formulario de HubSpot -->
+        <div id="hubspot-form-container" class="mt-4 max-h-[450px] overflow-y-auto custom-scrollbar p-1"></div>
       </div>
     </div>
 
     <!-- PANTALLA 2: Menú de Selección de Juego -->
     <div id="menu-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden transition-all duration-300">
-      <div class="kiosk-card w-full max-w-xl rounded-2xl p-8 text-white text-center">
-        <h2 class="text-3xl font-black text-[#ffca28] tracking-widest mb-2 uppercase">SELECCIONA TU DESAFÍO</h2>
-        <p class="text-gray-300 font-semibold mb-8 text-sm md:text-base">Demuestra tus habilidades frente a toda la hinchada</p>
+      <div class="kiosk-card w-full max-w-4xl rounded-2xl p-6 text-center">
+        <h2 class="text-2xl md:text-3xl font-black text-[#00205b] tracking-widest mb-2 uppercase">SELECCIONA TU DESAFÍO</h2>
+        <p class="text-[#00205b] font-semibold mb-6 text-sm md:text-base">Demuestra tus habilidades frente a toda la hinchada</p>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Tarjeta Juego 1 -->
-          <div onclick="selectGameMode('PENALTY')" class="cursor-pointer bg-gradient-to-br from-[#122849] to-[#0a172b] border-2 border-red-600 hover:border-[#ffca28] p-6 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200">
-            <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fa-solid fa-shoe-prints text-2xl text-white"></i>
+          <div onclick="selectGameMode('PENALTY')" class="cursor-pointer bg-white border border-slate-200 shadow-sm hover:border-[#e4002b] p-5 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between">
+            <div>
+              <div class="w-14 h-14 bg-[#e4002b] rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <i class="fa-solid fa-shoe-prints text-2xl text-white"></i>
+              </div>
+              <h3 class="text-lg font-bold text-[#00205b] mb-2 uppercase">Penales de Oro</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">Arrastra el dedo en la pantalla para patear el penal, esquiva la estirada del arquero y anota.</p>
             </div>
-            <h3 class="text-xl font-bold text-[#ffca28] mb-2 uppercase">Penales de Oro</h3>
-            <p class="text-xs text-gray-300 leading-relaxed">Arrastra el dedo en la pantalla para patear el penal, esquiva la estirada del arquero y anota.</p>
           </div>
 
           <!-- Tarjeta Juego 2 -->
-          <div onclick="selectGameMode('KEEPIE')" class="cursor-pointer bg-gradient-to-br from-[#122849] to-[#0a172b] border-2 border-yellow-600 hover:border-red-500 p-6 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200">
-            <div class="w-16 h-16 bg-[#ffca28] rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fa-solid fa-futbol text-2xl text-[#061224]"></i>
+          <div onclick="selectGameMode('KEEPIE')" class="cursor-pointer bg-white border border-slate-200 shadow-sm hover:border-[#ffb81c] p-5 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between">
+            <div>
+              <div class="w-14 h-14 bg-[#ffb81c] rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <i class="fa-solid fa-futbol text-2xl text-[#00205b]"></i>
+              </div>
+              <h3 class="text-lg font-bold text-[#00205b] mb-2 uppercase">Dominadas Tricolor</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">Toca repetidamente el balón antes de que toque el césped para mantenerlo en el aire.</p>
             </div>
-            <h3 class="text-xl font-bold text-white mb-2 uppercase">Dominadas Tricolor</h3>
-            <p class="text-xs text-gray-300 leading-relaxed">Toca repetidamente el balón antes de que toque el césped para mantenerlo en el aire.</p>
+          </div>
+
+          <!-- Tarjeta Juego 3 -->
+          <div onclick="selectGameMode('REFLEX')" class="cursor-pointer bg-white border border-slate-200 shadow-sm hover:border-[#00205b] p-5 rounded-xl text-center transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between">
+            <div>
+              <div class="w-14 h-14 bg-[#00205b] rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                <i class="fa-solid fa-bolt text-2xl text-white"></i>
+              </div>
+              <h3 class="text-lg font-bold text-[#00205b] mb-2 uppercase">Reflejos de Arco</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">Toca rápidamente los logos del Austro que se iluminan antes de que se agote el tiempo.</p>
+            </div>
           </div>
         </div>
 
-        <button onclick="startFreshSession()" class="mt-8 text-sm text-[#ffca28] hover:underline uppercase font-bold tracking-wider">
+        <button onclick="startFreshSession()" class="mt-8 text-sm text-[#e4002b] hover:underline uppercase font-bold tracking-wider">
           <i class="fa-solid fa-arrow-left-long mr-2"></i> Registrar otro jugador
         </button>
       </div>
     </div>
 
     <!-- PANTALLA 3: Pantalla de Carga y Sincronización -->
-    <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden bg-[#061224]/90">
-      <div class="text-center text-white">
-        <div class="w-20 h-20 border-8 border-slate-700 border-t-[#ffca28] rounded-full animate-spin mx-auto mb-6"></div>
-        <h3 id="loading-text" class="text-2xl font-black tracking-widest text-[#ffca28] uppercase">Procesando datos mundialistas...</h3>
-        <p class="text-gray-400 mt-2 font-semibold">Conectando con el CRM de Banco del Austro</p>
+    <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden bg-white/95 backdrop-blur-sm">
+      <div class="text-center text-[#00205b]">
+        <div class="w-20 h-20 border-8 border-slate-200 border-t-[#e4002b] rounded-full animate-spin mx-auto mb-6"></div>
+        <h3 id="loading-text" class="text-2xl font-black tracking-widest text-[#00205b] uppercase">Procesando datos mundialistas...</h3>
+        <p class="text-slate-500 mt-2 font-semibold">Conectando con el CRM de Banco del Austro</p>
       </div>
     </div>
 
     <!-- PANTALLA 4: Leaderboard en Tiempo Real -->
     <div id="leaderboard-overlay" class="absolute inset-0 flex items-center justify-center p-4 z-10 hidden">
-      <div class="kiosk-card w-full max-w-2xl rounded-2xl p-6 md:p-8 text-white">
+      <div class="kiosk-card w-full max-w-2xl rounded-2xl p-6 md:p-8">
         <div class="text-center mb-6">
-          <i class="fa-solid fa-trophy text-4xl text-[#ffca28] mb-3 animate-bounce"></i>
-          <h2 id="leaderboard-title" class="text-3xl font-black text-[#ffca28] tracking-widest uppercase">TABLA DE POSICIONES</h2>
-          <p class="text-gray-300 text-sm font-semibold">Los mejores goleadores del Fan Fest</p>
+          <i class="fa-solid fa-trophy text-4xl text-[#ffb81c] mb-3 animate-bounce"></i>
+          <h2 id="leaderboard-title" class="text-3xl font-black text-[#00205b] tracking-widest uppercase">TABLA DE POSICIONES</h2>
+          <p class="text-slate-500 text-sm font-semibold">Los mejores goleadores del Fan Fest</p>
         </div>
 
-        <div class="table-scroll-container overflow-hidden rounded-xl border border-slate-800 bg-[#091526]/80 mb-6">
+        <div class="table-scroll-container overflow-hidden rounded-xl border border-slate-200 bg-white mb-6">
           <div class="max-h-60 overflow-y-auto custom-scrollbar">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-[#10233c] text-[#ffca28] text-xs md:text-sm uppercase font-extrabold tracking-wider">
+                <tr class="bg-[#f8fafc] text-[#00205b] text-xs md:text-sm uppercase font-extrabold tracking-wider border-b border-slate-200">
                   <th class="py-3 px-6 text-center w-16">Pos.</th>
                   <th class="py-3 px-6">Jugador</th>
                   <th class="py-3 px-6 text-center w-32">Récord</th>
                 </tr>
               </thead>
-              <tbody id="leaderboard-rows" class="text-sm md:text-base font-semibold divide-y divide-slate-800">
+              <tbody id="leaderboard-rows" class="text-sm md:text-base font-semibold divide-y divide-slate-200 text-[#00205b]">
                 <!-- Se poblará dinámicamente con JavaScript -->
               </tbody>
             </table>
@@ -258,10 +269,23 @@
     
     // Variables globales de control del jugador y juego
     let playerProfile = null;
-    let activeGameMode = null; // 'PENALTY' o 'KEEPIE'
+    let activeGameMode = null; // 'PENALTY', 'KEEPIE' o 'REFLEX'
+    let lastActiveGameMode = null;
     let currentSessionScore = 0;
     let penaltyAttempts = 0;
     const maxPenaltyAttempts = 5;
+
+    // Variables para el juego de Reflejos
+    let reflexTargets = [];
+    let activeTargetIndex = -1;
+    let reflexStartTime = 0;
+    let reflexLives = 3;
+    const baseTargetDuration = 1500;
+    let currentTargetDuration = 1500;
+    let lastTargetSpawnTime = 0;
+    const reflexGameDuration = 45; // Duración aumentada de 30s a 45s
+    let reflexGameFinished = false;
+    let keepieGameFinished = false;
 
     // Variables de motor físico y estado en p5.js
     let gameEngineState = 'UNINITIALIZED';
@@ -271,7 +295,7 @@
     let displayMessageTimer = 0;
 
     // Base de datos simulada local en memoria para robustez total sin conexión (Fallback Offline)
-    let localLeaderboard = {
+    const defaultLeaderboard = {
       penalty: [
         { firstName: 'Marcelo', lastName: 'E.', score: 5 },
         { firstName: 'Andrés', lastName: 'C.', score: 4 },
@@ -287,17 +311,39 @@
         { firstName: 'Andrés', lastName: 'C.', score: 11 },
         { firstName: 'Luis', lastName: 'G.', score: 8 },
         { firstName: 'Paola', lastName: 'R.', score: 5 }
+      ],
+      reflex: [
+        { firstName: 'Diego', lastName: 'S.', score: 25 },
+        { firstName: 'Andrés', lastName: 'C.', score: 22 },
+        { firstName: 'Esteban', lastName: 'M.', score: 20 },
+        { firstName: 'Daniela', lastName: 'V.', score: 18 },
+        { firstName: 'Juan', lastName: 'P.', score: 15 },
+        { firstName: 'Maria', lastName: 'L.', score: 12 }
       ]
     };
+
+    let localLeaderboard = defaultLeaderboard;
+    try {
+      const stored = localStorage.getItem('austro_leaderboard');
+      if (stored) {
+        localLeaderboard = JSON.parse(stored);
+      } else {
+        localStorage.setItem('austro_leaderboard', JSON.stringify(defaultLeaderboard));
+      }
+    } catch (e) {
+      console.warn("localStorage no disponible para leaderboard:", e);
+    }
 
     // ==========================================
     // INICIALIZACIÓN Y MOTOR DE RENDER (p5.js)
     // ==========================================
     function setup() {
-      const container = document.getElementById('canvas-container');
-      const canvas = createCanvas(container.clientWidth, container.clientHeight);
+      // Establecer un canvas lógico de baja densidad constante (540x960) para optimizar el rendimiento en Android 11 a 60 FPS
+      const logicalWidth = 540;
+      const logicalHeight = 960;
+      
+      const canvas = createCanvas(logicalWidth, logicalHeight);
       canvas.parent('canvas-container');
-      canvas.style('display', 'block');
       
       resetBallPhysics();
       resetGoalieAI();
@@ -306,9 +352,7 @@
 
     function draw() {
       if (activeGameMode === null) {
-        // Renderizar un estadio en reposo cuando no se está jugando
-        drawStadiumPitch(false);
-        drawAmbientStadiumGlow();
+        background('#f0f2f5'); // Fondo limpio para cuando no se está jugando
         return;
       }
 
@@ -324,6 +368,9 @@
       } else if (activeGameMode === 'KEEPIE') {
         updateKeepiePhysics();
         drawSoccerBall();
+      } else if (activeGameMode === 'REFLEX') {
+        updateReflexPhysics();
+        drawReflexGame();
       }
 
       drawScoreHUD();
@@ -334,49 +381,49 @@
     // CAPA ESTÉTICA Y GRÁFICOS VECTORIALES
     // ==========================================
     function drawStadiumPitch(activeGame) {
-      background('#061224'); // Color de fondo base
+      background('#f0f2f5'); // Color de fondo base claro
 
       // Dibujo de las gradas y el graderío estilizado
       noStroke();
-      fill('#0d213a');
+      fill('#e2e8f0');
       rect(0, 0, width, height * 0.4);
       
       // Gradas traseras en perspectiva
-      fill('#09172b');
+      fill('#cbd5e1');
       quad(0, height * 0.4, width, height * 0.4, width, height * 0.42, 0, height * 0.42);
 
       // Línea de luces de fondo (Glow de Estadio)
-      stroke('rgba(255, 202, 40, 0.15)');
+      stroke('rgba(255, 184, 28, 0.4)');
       strokeWeight(40);
       line(0, height * 0.25, width, height * 0.25);
 
       // Publicidad estática en la cancha del Banco del Austro
       noStroke();
-      fill('#102a4d');
+      fill('#00205b');
       rect(0, height * 0.38, width, height * 0.05);
       
       // Texto de publicidad
-      fill('#ffca28');
+      fill('#ffffff');
       textSize(constrain(width * 0.02, 12, 28));
       textAlign(CENTER, CENTER);
       textStyle(BOLD);
       text("★ BANCO DEL AUSTRO ★   APOYANDO A LA TRI   ★   FAN FEST MUNDIALISTA ★", width / 2, height * 0.405);
 
-      // Terreno de juego (Césped Verde Azulado Premium)
-      let greenColor = activeGame ? '#0f3a20' : '#072412';
+      // Terreno de juego (Césped Verde Vivo)
+      let greenColor = activeGame ? '#4caf50' : '#388e3c';
       fill(greenColor);
       noStroke();
       quad(0, height, width, height, width, height * 0.43, 0, height * 0.43);
 
       // Líneas de cal reglamentarias (Área grande)
-      stroke('rgba(255,255,255,0.15)');
+      stroke('rgba(255,255,255,0.8)');
       strokeWeight(3);
       noFill();
       quad(width * 0.05, height, width * 0.95, height, width * 0.8, height * 0.43, width * 0.2, height * 0.43);
 
       // Punto penal (Círculo blanco)
       if (activeGameMode === 'PENALTY') {
-        fill('rgba(255, 255, 255, 0.8)');
+        fill('rgba(255, 255, 255, 0.9)');
         noStroke();
         ellipse(width / 2, height * 0.85, width * 0.025, width * 0.012);
       }
@@ -384,7 +431,7 @@
 
     function drawAmbientStadiumGlow() {
       // Efectos de luces circulares abstractos de fondo
-      fill('rgba(255, 202, 40, 0.03)');
+      fill('rgba(255, 184, 28, 0.08)');
       noStroke();
       ellipse(width / 2, height / 2, sin(frameCount * 0.02) * width * 0.4 + width * 0.5);
     }
@@ -424,15 +471,15 @@
       noStroke();
       ellipse(0, goalie.height * 0.5, goalie.width * 1.5, goalie.height * 0.3);
 
-      // Cuerpo / Uniforme (Arquero Banco del Austro en Rojo)
-      fill('#d32f2f');
+      // Cuerpo / Uniforme (Arquero Banco del Austro en Azul)
+      fill('#00205b');
       stroke('#ffffff');
       strokeWeight(3);
       rectMode(CENTER);
       rect(0, 0, goalie.width, goalie.height, 12);
 
       // Guantes de portero (Amarillos)
-      fill('#ffca28');
+      fill('#ffb81c');
       ellipse(-goalie.width * 0.7, -goalie.height * 0.1, goalie.width * 0.35);
       ellipse(goalie.width * 0.7, -goalie.height * 0.1, goalie.width * 0.35);
 
@@ -488,11 +535,11 @@
     function drawDragTrajectory() {
       // Si el usuario está realizando un tiro, dibujar trayectoria proyectada
       if (isDragging && swipeStart) {
-        stroke('rgba(255, 202, 40, 0.6)');
+        stroke('rgba(228, 0, 43, 0.6)');
         strokeWeight(6);
         line(swipeStart.x, swipeStart.y, mouseX, mouseY);
         
-        fill('#ffca28');
+        fill('#e4002b');
         noStroke();
         ellipse(mouseX, mouseY, 15);
       }
@@ -501,31 +548,54 @@
     function drawScoreHUD() {
       // Elementos de pantalla informativos (HUD) gigantes para TV
       noStroke();
-      fill('rgba(15, 34, 61, 0.85)');
+      fill('rgba(255, 255, 255, 0.95)');
       rect(15, 15, width < 600 ? 160 : 260, 80, 10);
+      stroke('rgba(0, 32, 91, 0.1)');
+      strokeWeight(1);
       
-      fill('#ffca28');
+      fill('#00205b');
+      noStroke();
       textSize(width < 600 ? 14 : 18);
       textAlign(LEFT, TOP);
       textStyle(BOLD);
       text(`JUGADOR: ${playerProfile ? playerProfile.firstName : 'Invitado'}`, 25, 25);
       
-      fill('#ffffff');
+      fill('#e4002b');
       textSize(width < 600 ? 18 : 24);
       text(`PUNTOS: ${currentSessionScore}`, 25, 45);
 
       if (activeGameMode === 'PENALTY') {
-        fill('rgba(15, 34, 61, 0.85)');
+        fill('rgba(255, 255, 255, 0.95)');
         rect(width - (width < 600 ? 130 : 180), 15, width < 600 ? 115 : 165, 80, 10);
         
-        fill('#ff5252');
+        fill('#00205b');
         textSize(width < 600 ? 13 : 16);
         textAlign(RIGHT, TOP);
         text("DISPAROS", width - 25, 25);
         
-        fill('#ffffff');
+        fill('#e4002b');
         textSize(width < 600 ? 22 : 28);
         text(`${penaltyAttempts} / ${maxPenaltyAttempts}`, width - 25, 42);
+      } else if (activeGameMode === 'REFLEX') {
+        fill('rgba(255, 255, 255, 0.95)');
+        rect(width - (width < 600 ? 130 : 180), 15, width < 600 ? 115 : 165, 80, 10);
+        
+        fill('#00205b');
+        textSize(width < 600 ? 13 : 16);
+        textAlign(RIGHT, TOP);
+        text("TIEMPO / VIDAS", width - 25, 25);
+        
+        let elapsedGameTime = millis() - reflexStartTime;
+        let remainingTime = max(0, reflexGameDuration - Math.floor(elapsedGameTime / 1000));
+        
+        fill('#e4002b');
+        textSize(width < 600 ? 18 : 24);
+        
+        let livesStr = "";
+        for (let i = 0; i < 3; i++) {
+          livesStr += i < reflexLives ? "⚽" : "○";
+        }
+        text(`${remainingTime}s  ${livesStr}`, width - 25, 45);
       }
     }
 
@@ -537,12 +607,12 @@
         textStyle(BOLD);
         
         // Sombra de texto
-        fill(0, 0, 0, 150);
+        fill(255, 255, 255, 200);
         text(displayMessage, width / 2 + 4, height * 0.45 + 4);
         
         // Texto principal
-        let msgColor = displayMessage.includes("GOL") ? '#ffca28' : '#ff3d3d';
-        if (displayMessage.includes("TOQUE")) msgColor = '#4caf50';
+        let msgColor = displayMessage.includes("GOL") ? '#00205b' : '#e4002b';
+        if (displayMessage.includes("TOQUE")) msgColor = '#ffb81c';
         
         fill(msgColor);
         text(displayMessage, width / 2, height * 0.45);
@@ -604,6 +674,8 @@
     }
 
     function updateKeepiePhysics() {
+      if (keepieGameFinished) return;
+      
       // El juego de dominadas funciona en plano puramente 2D
       ball.y += ball.vy;
       ball.x += ball.vx;
@@ -617,11 +689,11 @@
 
       // Si la pelota desciende por debajo de la línea límite inferior
       if (ball.y > height * 0.95) {
-        activeGameMode = null;
+        keepieGameFinished = true;
         triggerMessage("¡FIN DEL JUEGO!");
         setTimeout(() => {
           endGameSession();
-        }, 1200);
+        }, 1500);
       }
     }
 
@@ -661,18 +733,240 @@
     }
 
     // ==========================================
+    // LÓGICA Y RENDER DEL JUEGO DE REFLEJOS
+    // ==========================================
+    function initializeReflexTargets() {
+      let targetRadius = constrain(width * 0.1, 45, 80);
+      reflexTargets = [
+        { x: width * 0.22, y: height * 0.40, radius: targetRadius, feedbackState: null, feedbackTimer: 0 }, // Alto Izquierda
+        { x: width * 0.50, y: height * 0.32, radius: targetRadius, feedbackState: null, feedbackTimer: 0 }, // Alto Centro
+        { x: width * 0.78, y: height * 0.40, radius: targetRadius, feedbackState: null, feedbackTimer: 0 }, // Alto Derecha
+        { x: width * 0.22, y: height * 0.65, radius: targetRadius, feedbackState: null, feedbackTimer: 0 }, // Bajo Izquierda
+        { x: width * 0.50, y: height * 0.73, radius: targetRadius, feedbackState: null, feedbackTimer: 0 }, // Bajo Centro
+        { x: width * 0.78, y: height * 0.65, radius: targetRadius, feedbackState: null, feedbackTimer: 0 }  // Bajo Derecha
+      ];
+    }
+
+    function spawnNewReflexTarget() {
+      let prevIndex = activeTargetIndex;
+      let newIndex = prevIndex;
+      while (newIndex === prevIndex) {
+        newIndex = Math.floor(random(0, reflexTargets.length));
+      }
+      activeTargetIndex = newIndex;
+      lastTargetSpawnTime = millis();
+      currentTargetDuration = max(550, baseTargetDuration - (currentSessionScore * 45));
+    }
+
+    function updateReflexPhysics() {
+      if (reflexGameFinished) return;
+
+      let elapsedGameTime = millis() - reflexStartTime;
+      let remainingTime = reflexGameDuration - Math.floor(elapsedGameTime / 1000);
+      
+      if (remainingTime <= 0 || reflexLives <= 0) {
+        reflexGameFinished = true;
+        triggerMessage(reflexLives <= 0 ? "¡SIN VIDAS!" : "¡TIEMPO!");
+        setTimeout(() => {
+          endGameSession();
+        }, 1500);
+        return;
+      }
+      
+      let timeSinceLastSpawn = millis() - lastTargetSpawnTime;
+      if (timeSinceLastSpawn > currentTargetDuration) {
+        reflexLives--;
+        
+        // Poner feedback rojo en el sensor activo que expiró
+        if (activeTargetIndex !== -1) {
+          reflexTargets[activeTargetIndex].feedbackState = 'FAILURE';
+          reflexTargets[activeTargetIndex].feedbackTimer = 25;
+        }
+        
+        if (reflexLives <= 0) {
+          reflexGameFinished = true;
+          triggerMessage("¡SIN VIDAS!");
+          setTimeout(() => {
+            endGameSession();
+          }, 1500);
+          return;
+        }
+        
+        spawnNewReflexTarget();
+      }
+    }
+
+    function drawReflexGame() {
+      let targetRadius = constrain(width * 0.1, 45, 80);
+      
+      // Dibujar título superior o instrucciones
+      textAlign(CENTER, TOP);
+      noStroke();
+      fill('#00205b');
+      textSize(constrain(width * 0.035, 16, 26));
+      textStyle(BOLD);
+      text("¡TOCA EL SENSOR ACTIVO!", width / 2, height * 0.22);
+      
+      if (reflexTargets.length === 0) {
+        initializeReflexTargets();
+      }
+      
+      for (let i = 0; i < reflexTargets.length; i++) {
+        let t = reflexTargets[i];
+        let isActive = (i === activeTargetIndex && !reflexGameFinished);
+        
+        // Manejar temporizador de feedback
+        if (t.feedbackTimer > 0) {
+          t.feedbackTimer--;
+          if (t.feedbackTimer === 0) {
+            t.feedbackState = null;
+          }
+        }
+        
+        push();
+        translate(t.x, t.y);
+        
+        if (t.feedbackState === 'SUCCESS') {
+          // Dibujar sensor exitoso (Verde)
+          fill('#4caf50');
+          stroke('#ffffff');
+          strokeWeight(4);
+          ellipse(0, 0, targetRadius * 2);
+          
+          noStroke();
+          fill('#ffffff');
+          textSize(targetRadius * 0.6);
+          textAlign(CENTER, CENTER);
+          textStyle(BOLD);
+          text("✓", 0, -2);
+        } else if (t.feedbackState === 'FAILURE') {
+          // Dibujar sensor fallido (Rojo)
+          fill('#e4002b');
+          stroke('#ffffff');
+          strokeWeight(4);
+          ellipse(0, 0, targetRadius * 2);
+          
+          noStroke();
+          fill('#ffffff');
+          textSize(targetRadius * 0.6);
+          textAlign(CENTER, CENTER);
+          textStyle(BOLD);
+          text("✗", 0, -2);
+        } else if (isActive) {
+          let pulse = sin(frameCount * 0.15) * 8;
+          
+          fill('rgba(255, 184, 28, 0.4)');
+          noStroke();
+          ellipse(0, 0, (targetRadius * 2) + pulse + 15);
+          
+          fill('#ffffff');
+          stroke('#ffb81c');
+          strokeWeight(6);
+          ellipse(0, 0, (targetRadius * 2) + pulse);
+          
+          stroke('#e4002b');
+          strokeWeight(3);
+          noFill();
+          ellipse(0, 0, (targetRadius * 2) + pulse - 6);
+          
+          noStroke();
+          fill('#00205b');
+          textSize(targetRadius * 0.6);
+          textAlign(CENTER, CENTER);
+          textStyle(BOLD);
+          text("A", 0, -2);
+          
+          textSize(targetRadius * 0.22);
+          text("AUSTRO", 0, targetRadius * 0.45);
+          
+        } else {
+          fill('rgba(255, 255, 255, 0.6)');
+          stroke('rgba(0, 32, 91, 0.2)');
+          strokeWeight(3);
+          ellipse(0, 0, targetRadius * 2);
+          
+          fill('rgba(0, 32, 91, 0.15)');
+          noStroke();
+          ellipse(0, 0, targetRadius * 0.7);
+          
+          fill('rgba(255, 255, 255, 0.6)');
+          ellipse(0, 0, targetRadius * 0.2);
+          ellipse(-targetRadius * 0.2, -targetRadius * 0.1, targetRadius * 0.12);
+          ellipse(targetRadius * 0.2, -targetRadius * 0.1, targetRadius * 0.12);
+          ellipse(-targetRadius * 0.15, targetRadius * 0.2, targetRadius * 0.12);
+          ellipse(targetRadius * 0.15, targetRadius * 0.2, targetRadius * 0.12);
+        }
+        
+        pop();
+      }
+    }
+
+    // ==========================================
     // EVENTOS DE ENTRADA TÁCTIL (MÓVIL Y SMART TV)
     // ==========================================
     function touchStarted() {
       if (activeGameMode === null) return false;
 
-      if (activeGameMode === 'PENALTY' && !ball.isKicked) {
+      if (activeGameMode === 'REFLEX') {
+        if (reflexGameFinished) return false;
+
+        let targetRadius = constrain(width * 0.1, 45, 80);
+        let clickedActive = false;
+        let clickedInactiveIndex = -1;
+        
+        if (activeTargetIndex !== -1) {
+          let t = reflexTargets[activeTargetIndex];
+          let d = dist(mouseX, mouseY, t.x, t.y);
+          if (d <= targetRadius * 1.3) {
+            clickedActive = true;
+          }
+        }
+        
+        if (!clickedActive) {
+          for (let i = 0; i < reflexTargets.length; i++) {
+            if (i === activeTargetIndex) continue;
+            let t = reflexTargets[i];
+            let d = dist(mouseX, mouseY, t.x, t.y);
+            if (d <= targetRadius * 1.2) {
+              clickedInactiveIndex = i;
+              break;
+            }
+          }
+        }
+        
+        if (clickedActive) {
+          currentSessionScore++;
+          
+          // Feedback verde en el sensor presionado
+          reflexTargets[activeTargetIndex].feedbackState = 'SUCCESS';
+          reflexTargets[activeTargetIndex].feedbackTimer = 15;
+          
+          spawnNewReflexTarget();
+        } else if (clickedInactiveIndex !== -1) {
+          reflexLives--;
+          
+          // Feedback rojo en el sensor incorrecto presionado
+          reflexTargets[clickedInactiveIndex].feedbackState = 'FAILURE';
+          reflexTargets[clickedInactiveIndex].feedbackTimer = 25;
+          
+          if (reflexLives <= 0) {
+            reflexGameFinished = true;
+            triggerMessage("¡SIN VIDAS!");
+            setTimeout(() => {
+              endGameSession();
+            }, 1500);
+            return false;
+          }
+          
+          spawnNewReflexTarget();
+        }
+      } else if (activeGameMode === 'PENALTY' && !ball.isKicked) {
         swipeStart = createVector(mouseX, mouseY);
         isDragging = true;
       } else if (activeGameMode === 'KEEPIE') {
         let touchDistance = dist(mouseX, mouseY, ball.x, ball.y);
-        // Margen ampliado para facilitar el toque en pantallas gigantes de TV
-        let hitMargin = ball.renderRadius * 1.8;
+        // Margen ampliado (a 2.2x del radio del balón) para pantallas gigantes táctiles con vidrio grueso de 6.3mm
+        let hitMargin = ball.renderRadius * 2.2;
         
         if (touchDistance <= hitMargin) {
           // El toque inyecta velocidad ascendente (negativa en Y)
@@ -721,78 +1015,102 @@
     }
 
     function windowResized() {
-      const container = document.getElementById('canvas-container');
-      resizeCanvas(container.clientWidth, container.clientHeight);
-      resetBallPhysics();
-      resetGoalieAI();
+      // El canvas mantiene su tamaño lógico de baja densidad (540x960).
+      // El escalado a pantalla completa se gestiona mediante CSS con aceleración por hardware.
     }
 
     // ==========================================
-    // GESTIÓN DE FLUJO DE INTERFAZ Y CRM
+    // GESTIÓN DE FLUJO DE INTERFAZ Y CRM (HubSpot Forms Embed)
     // ==========================================
-    function processRegistration(event) {
-      event.preventDefault();
-      
-      const payload = {
-        firstName: document.getElementById('reg-firstname').value,
-        lastName: document.getElementById('reg-lastname').value,
-        email: document.getElementById('reg-email').value,
-        phone: document.getElementById('reg-phone').value,
-        identificacion: document.getElementById('reg-id').value
-      };
+    function loadHubspotForm() {
+      const container = document.getElementById('hubspot-form-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+      if (window.hbspt) {
+        window.hbspt.forms.create({
+          portalId: "41516556",
+          formId: "ad6aa7df-8392-4808-8864-e905be4582d3",
+          region: "na1",
+          target: "#hubspot-form-container"
+        });
+      }
+    }
 
-      // Control de pantalla de carga
-      document.getElementById('registration-overlay').classList.add('hidden');
-      const loader = document.getElementById('loading-overlay');
-      const loadingText = document.getElementById('loading-text');
-      loadingText.innerText = "Registrando datos del participante...";
-      loader.classList.remove('hidden');
+    // Escuchar el evento de envío del formulario de HubSpot para la transición y recolección de datos
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'hsFormCallback' && event.data.eventName === 'onFormSubmitted') {
+        const submissionData = event.data.data;
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        let identificacion = "";
 
-      // Intentar sincronización con el proxy en la nube
-      fetch(`${SECURE_PROXY_URL}/api/player`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('Error de conexión con el proxy');
-        return res.json();
-      })
-      .then(data => {
-        playerProfile = data.contact;
-        loader.classList.add('hidden');
-        document.getElementById('menu-overlay').classList.remove('hidden');
-      })
-      .catch(err => {
-        console.warn('Operando en modo local por desconexión del servidor:', err);
-        // Modo local robusto para evitar colapsos durante el evento físico en el estadio
+        // Extraer los valores de los campos enviados
+        if (submissionData && Array.isArray(submissionData)) {
+          submissionData.forEach(field => {
+            if (field.name === 'email') email = field.value;
+            if (field.name === 'firstname') firstName = field.value;
+            if (field.name === 'lastname') lastName = field.value;
+            if (field.name === 'cedula' || field.name === 'identificacion' || field.name === 'num_cedula') {
+              identificacion = field.value;
+            }
+          });
+        }
+
         playerProfile = {
-          id: 'local_' + Date.now(),
-          firstName: payload.firstName,
-          lastName: payload.lastName,
-          email: payload.email,
-          identificacion: payload.identificacion
+          id: event.data.id || ('hs_' + Date.now()),
+          firstName: firstName || 'Jugador',
+          lastName: lastName || '',
+          email: email || '',
+          identificacion: identificacion || '0000000000'
         };
-        setTimeout(() => {
-          loader.classList.add('hidden');
-          document.getElementById('menu-overlay').classList.remove('hidden');
-        }, 800);
-      });
-    }
+
+        // Guardar lead localmente en localStorage para resiliencia offline híbrida
+        try {
+          let offlineLeads = JSON.parse(localStorage.getItem('austro_offline_leads') || '[]');
+          offlineLeads.push(playerProfile);
+          localStorage.setItem('austro_offline_leads', JSON.stringify(offlineLeads));
+        } catch (e) {
+          console.warn("Error al respaldar lead de HubSpot en localStorage:", e);
+        }
+
+        // Transición de overlays
+        document.getElementById('registration-overlay').classList.add('hidden');
+        document.getElementById('menu-overlay').classList.remove('hidden');
+      }
+    });
 
     function selectGameMode(mode) {
       activeGameMode = mode;
+      lastActiveGameMode = mode;
       currentSessionScore = 0;
       penaltyAttempts = 0;
       
       document.getElementById('menu-overlay').classList.add('hidden');
       resetBallPhysics();
       resetGoalieAI();
+      
+      if (mode === 'REFLEX') {
+        initializeReflexTargets();
+        reflexStartTime = millis();
+        reflexLives = 3;
+        currentSessionScore = 0;
+        currentTargetDuration = baseTargetDuration;
+        reflexGameFinished = false;
+        spawnNewReflexTarget();
+      } else if (mode === 'KEEPIE') {
+        keepieGameFinished = false;
+      }
+      
       gameEngineState = 'PLAYING';
     }
 
     function endGameSession() {
-      const gameTypeKey = activeGameMode === 'PENALTY' ? 'penalty' : 'keepie';
+      let gameTypeKey = 'penalty';
+      let currentMode = activeGameMode || lastActiveGameMode;
+      if (currentMode === 'KEEPIE') gameTypeKey = 'keepie';
+      if (currentMode === 'REFLEX') gameTypeKey = 'reflex';
       activeGameMode = null;
       
       const loader = document.getElementById('loading-overlay');
@@ -826,6 +1144,13 @@
         // Reordenar localmente descendente
         localLeaderboard[gameTypeKey].sort((a, b) => b.score - a.score);
         
+        // Guardar en localStorage para resiliencia offline
+        try {
+          localStorage.setItem('austro_leaderboard', JSON.stringify(localLeaderboard));
+        } catch (e) {
+          console.warn("Error al respaldar leaderboard en localStorage:", e);
+        }
+
         setTimeout(() => {
           renderLeaderboardView(localLeaderboard[gameTypeKey], gameTypeKey);
         }, 800);
@@ -850,17 +1175,19 @@
       const rowsContainer = document.getElementById('leaderboard-rows');
       rowsContainer.innerHTML = '';
       
-      document.getElementById('leaderboard-title').innerText = 
-        gameType === 'penalty' ? "LÍDERES DE PENALES" : "LÍDERES DE DOMINADAS";
+      let title = "LÍDERES DE PENALES";
+      if (gameType === 'keepie') title = "LÍDERES DE DOMINADAS";
+      if (gameType === 'reflex') title = "LÍDERES DE REFLEJOS";
+      document.getElementById('leaderboard-title').innerText = title;
 
       records.slice(0, 10).forEach((record, index) => {
         const medalIcon = index === 0 ? '🏆' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : ''));
         const row = document.createElement('tr');
-        row.className = index < 3 ? 'bg-[#ffca28]/10 text-white' : 'hover:bg-slate-800/40 text-slate-300';
+        row.className = index < 3 ? 'bg-[#ffb81c]/20 text-[#00205b]' : 'hover:bg-slate-100 text-slate-700';
         row.innerHTML = `
-          <td class="py-3 px-6 text-center font-bold text-[#ffca28]">${index + 1} ${medalIcon}</td>
+          <td class="py-3 px-6 text-center font-bold text-[#e4002b]">${index + 1} ${medalIcon}</td>
           <td class="py-3 px-6 font-bold">${record.firstName} ${record.lastName}</td>
-          <td class="py-3 px-6 text-center font-black text-[#ffca28] text-lg">${record.score}</td>
+          <td class="py-3 px-6 text-center font-black text-[#00205b] text-lg">${record.score}</td>
         `;
         rowsContainer.appendChild(row);
       });
@@ -876,10 +1203,15 @@
 
     function startFreshSession() {
       playerProfile = null;
-      document.getElementById('austro-reg-form').reset();
+      loadHubspotForm(); // Recargar formulario limpio
       document.getElementById('leaderboard-overlay').classList.add('hidden');
       document.getElementById('registration-overlay').classList.remove('hidden');
     }
+
+    // Inicializar el formulario al cargar el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHubspotForm();
+    });
   </script>
 </body>
 </html>
