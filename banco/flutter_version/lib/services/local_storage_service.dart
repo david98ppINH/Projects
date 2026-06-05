@@ -30,7 +30,7 @@ class LocalStorageService {
           {'firstName': 'Esteban', 'lastName': 'M.', 'score': 4},
           {'firstName': 'Santiago', 'lastName': 'V.', 'score': 3},
           {'firstName': 'Xavier', 'lastName': 'A.', 'score': 3},
-          {'firstName': 'Cristian', 'lastName': 'P.', 'score': 2}
+          {'firstName': 'Cristian', 'lastName': 'P.', 'score': 2},
         ],
         'keepie': [
           {'firstName': 'Gabriela', 'lastName': 'T.', 'score': 18},
@@ -38,7 +38,7 @@ class LocalStorageService {
           {'firstName': 'Esteban', 'lastName': 'M.', 'score': 12},
           {'firstName': 'Andrés', 'lastName': 'C.', 'score': 11},
           {'firstName': 'Luis', 'lastName': 'G.', 'score': 8},
-          {'firstName': 'Paola', 'lastName': 'R.', 'score': 5}
+          {'firstName': 'Paola', 'lastName': 'R.', 'score': 5},
         ],
         'reflex': [
           {'firstName': 'Diego', 'lastName': 'S.', 'score': 25},
@@ -46,8 +46,8 @@ class LocalStorageService {
           {'firstName': 'Esteban', 'lastName': 'M.', 'score': 20},
           {'firstName': 'Daniela', 'lastName': 'V.', 'score': 18},
           {'firstName': 'Juan', 'lastName': 'P.', 'score': 15},
-          {'firstName': 'Maria', 'lastName': 'L.', 'score': 12}
-        ]
+          {'firstName': 'Maria', 'lastName': 'L.', 'score': 12},
+        ],
       };
       await _prefs.setString(_leaderboardKey, jsonEncode(defaultLeaderboard));
     }
@@ -59,7 +59,9 @@ class LocalStorageService {
     if (rawLeads == null) return [];
     try {
       final decoded = jsonDecode(rawLeads) as List;
-      return decoded.map((e) => PlayerLead.fromJson(e as Map<String, dynamic>)).toList();
+      return decoded
+          .map((e) => PlayerLead.fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       return [];
     }
@@ -80,7 +82,9 @@ class LocalStorageService {
     try {
       final decoded = jsonDecode(rawLeaderboard) as Map<String, dynamic>;
       final gameLeaderboard = decoded[gameType] as List;
-      return gameLeaderboard.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      return gameLeaderboard
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
     } catch (e) {
       return [];
     }
@@ -98,16 +102,18 @@ class LocalStorageService {
     try {
       final decoded = jsonDecode(rawLeaderboard) as Map<String, dynamic>;
       final gameLeaderboard = decoded[gameType] as List;
-      
+
       // Agregar el nuevo record
       gameLeaderboard.add({
         'firstName': firstName,
         'lastName': lastName.isNotEmpty ? '${lastName[0]}.' : '',
-        'score': score
+        'score': score,
       });
 
       // Ordenar descendente por puntuación
-      gameLeaderboard.sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
+      gameLeaderboard.sort(
+        (a, b) => (b['score'] as int).compareTo(a['score'] as int),
+      );
 
       // Guardar de vuelta
       decoded[gameType] = gameLeaderboard;

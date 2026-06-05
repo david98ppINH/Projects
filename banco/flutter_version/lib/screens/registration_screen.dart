@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:js' as js;
+import 'dart:ui_web' as ui_web;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../models/player_lead.dart';
 import '../services/local_storage_service.dart';
 import '../theme/bda_theme.dart';
@@ -13,51 +19,169 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _idController = TextEditingController();
-  bool _isLoading = false;
+
+  WebViewController? _webViewController;
 
   @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _idController.dispose();
-    super.dispose();
-  }
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      // Registrar la vista HTML para HubSpot
+      ui_web.platformViewRegistry.registerViewFactory(
+        'hubspot-form-view',
+        (int viewId) {
+          final element = html.DivElement()
+            ..id = 'hubspot-form-container'
+            ..style.width = '100%'
+            ..style.height = '100%'
+            ..style.overflowY = 'auto';
 
-  void _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+          // Inicializar el formulario con un leve delay tras montarse el elemento
+          Future.delayed(const Duration(milliseconds: 150), () {
+            js.context.callMethod('initHubspotForm', ['hubspot-form-container']);
+          });
 
-    setState(() {
-      _isLoading = true;
+          return element;
+        },
+      );
+
+      // Listener global de JavaScript para recibir el lead desde HubSpot
+      js.context['onHubspotSubmitted'] = (String jsonStr) {
+        final data = jsonDecode(jsonStr);
+        final lead = PlayerLead(
+          id: 'lead_${DateTime.now().millisecondsSinceEpoch}',
+          firstName: data['firstName'] ?? 'Jugador',
+          lastName: data['lastName'] ?? '',
+          email: data['email'] ?? '',
+          identificacion: data['identificacion'] ?? '0000000000',
+          score: 0,
+          gameType: '',
+          timestamp: DateTime.now().toIso8601String(),
+        );
+
+        LocalStorageService().saveLead(lead).then((_) {
+          if (mounted) {
+            widget.onRegister(lead);
+          }
+        });
+      };
+    } else {
+      // Configuración de WebView para Android/iOS
+      _webViewController = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onNavigationRequest: (NavigationRequest request) {
+              // Prevenir redirecciones externas (ej. a la web del banco) para no salirse del quiosco
+              if (!request.url.startsWith('about:blank') && !request.url.startsWith('data:')) {
+                return NavigationDecision.prevent;
+              }
+              return NavigationDecision.navigate;
+            },
+          ),
+        )
+        ..addJavaScriptChannel(
+          'HubspotChannel',
+          onMessageReceived: (JavaScriptMessage message) {
+            final data = jsonDecode(message.message);
+            final lead = PlayerLead(
+              id: 'lead_${DateTime.now().millisecondsSinceEpoch}',
+              firstName: data['firstName'] ?? 'Jugador',
+              lastName: data['lastName'] ?? '',
+              email: data['email'] ?? '',
+              identificacion: data['identificacion'] ?? '0000000000',
+              score: 0,
+              gameType: '',
+              timestamp: DateTime.now().toIso8601String(),
+            );
+
+            LocalStorageService().saveLead(lead).then((_) {
+              if (mounted) {
+                widget.onRegister(lead);
+              }
+            });
+          },
+        )
+        ..loadHtmlString('''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/embed/v2.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 10px;
+      background-color: white;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="hubspot-form-container"></div>
+  <script>
+    if (window.hbspt) {
+      window.hbspt.forms.create({
+        portalId: "41516556",
+        formId: "ad6aa7df-8392-4808-8864-e905be4582d3",
+        region: "na1",
+        target: '#hubspot-form-container',
+        inlineMessage: "Gracias por registrarte."
+      });
+    }
+
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'hsFormCallback' && event.data.eventName === 'onFormSubmitted') {
+        const submissionData = event.data.data;
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        let identificacion = "";
+
+        if (submissionData) {
+          if (Array.isArray(submissionData)) {
+            submissionData.forEach(function(field) {
+              var name = (field.name || '').toLowerCase();
+              var val = field.value || '';
+              
+              if (name === 'email' || name === 'correo' || name === 'mail') {
+                email = val;
+              } else if (name === 'firstname' || name === 'first_name' || name === 'nombre' || name === 'nombres' || name === 'name') {
+                firstName = val;
+              } else if (name === 'lastname' || name === 'last_name' || name === 'apellido' || name === 'apellidos') {
+                lastName = val;
+              } else if (name === 'cedula' || name === 'identificacion' || name === 'num_cedula' || name === 'identificación' || name === 'documento' || name === 'id') {
+                identificacion = val;
+              }
+            });
+          } else {
+            const vals = submissionData.submissionValues || submissionData;
+            if (vals && typeof vals === 'object') {
+              email = vals.email || vals.correo || vals.mail || email;
+              firstName = vals.firstname || vals.first_name || vals.firstName || vals.nombre || vals.nombres || vals.name || firstName;
+              lastName = vals.lastname || vals.last_name || vals.lastName || vals.apellido || vals.apellidos || lastName;
+              identificacion = vals.identificacion || vals.cedula || vals.num_cedula || vals.identificación || vals.documento || vals.id || identificacion;
+            }
+          }
+        }
+
+        const leadData = JSON.stringify({
+          firstName: firstName || 'Jugador',
+          lastName: lastName || '',
+          email: email || '',
+          identificacion: identificacion || '0000000000'
+        });
+
+        if (window.HubspotChannel) {
+          window.HubspotChannel.postMessage(leadData);
+        }
+      }
     });
-
-    // Simular un pequeño retardo de procesamiento local (a nivel de experiencia de usuario)
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    final lead = PlayerLead(
-      id: 'lead_${DateTime.now().millisecondsSinceEpoch}',
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      email: _emailController.text.trim(),
-      identificacion: _idController.text.trim(),
-      score: 0,
-      gameType: '',
-      timestamp: DateTime.now().toIso8601String(),
-    );
-
-    // Guardar en el servicio local
-    await LocalStorageService().saveLead(lead);
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    widget.onRegister(lead);
+  </script>
+</body>
+</html>
+''');
+    }
   }
 
   @override
@@ -174,134 +298,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                           ],
                         ),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Text(
-                                'REGISTRO DE JUGADOR',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: BdaColors.navy,
-                                  letterSpacing: 1.5,
+                        child: kIsWeb
+                            ? const SizedBox(
+                                width: double.infinity,
+                                height: 460,
+                                child: HtmlElementView(
+                                  viewType: 'hubspot-form-view',
+                                ),
+                              )
+                            : SizedBox(
+                                width: double.infinity,
+                                height: 460,
+                                child: WebViewWidget(
+                                  controller: _webViewController!,
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              
-                              // Nombres
-                              TextFormField(
-                                controller: _firstNameController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Nombres',
-                                  prefixIcon: Icon(Icons.person, color: BdaColors.navy),
-                                ),
-                                validator: (val) => val == null || val.trim().isEmpty ? 'Ingresa tus nombres' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Apellidos
-                              TextFormField(
-                                controller: _lastNameController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Apellidos',
-                                  prefixIcon: Icon(Icons.person_outline, color: BdaColors.navy),
-                                ),
-                                validator: (val) => val == null || val.trim().isEmpty ? 'Ingresa tus apellidos' : null,
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Cédula / Identificación
-                              TextFormField(
-                                controller: _idController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'Cédula / Identificación',
-                                  prefixIcon: Icon(Icons.badge, color: BdaColors.navy),
-                                  hintText: 'Ej. 0102030405',
-                                ),
-                                validator: (val) {
-                                  if (val == null || val.trim().isEmpty) {
-                                    return 'Ingresa tu identificación';
-                                  }
-                                  if (val.trim().length < 8) {
-                                    return 'Identificación inválida';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              
-                              // Correo Electrónico
-                              TextFormField(
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                decoration: const InputDecoration(
-                                  labelText: 'Correo Electrónico',
-                                  prefixIcon: Icon(Icons.email, color: BdaColors.navy),
-                                ),
-                                validator: (val) {
-                                  if (val == null || val.trim().isEmpty) {
-                                    return 'Ingresa tu correo';
-                                  }
-                                  final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-                                  if (!emailRegex.hasMatch(val.trim())) {
-                                    return 'Correo electrónico no válido';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 28),
-                              
-                              // Botón de Enviar (Grande y táctil)
-                              Container(
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  gradient: BdaColors.redGradient,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: BdaColors.red.withOpacity(0.35),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 6),
-                                    ),
-                                  ],
-                                ),
-                                child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _submitForm,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 3,
-                                          ),
-                                        )
-                                      : const Text(
-                                          'EMPEZAR A JUGAR',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 16,
-                                            letterSpacing: 1,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     ),
                   ),

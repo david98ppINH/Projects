@@ -44,9 +44,21 @@ class BdaTheme {
       scaffoldBackgroundColor: BdaColors.lightBackground,
       fontFamily: 'Assistant',
       textTheme: const TextTheme(
-        headlineLarge: TextStyle(color: BdaColors.textDark, fontWeight: FontWeight.w800, fontSize: 32),
-        headlineMedium: TextStyle(color: BdaColors.textDark, fontWeight: FontWeight.bold, fontSize: 24),
-        titleLarge: TextStyle(color: BdaColors.textDark, fontWeight: FontWeight.bold, fontSize: 20),
+        headlineLarge: TextStyle(
+          color: BdaColors.textDark,
+          fontWeight: FontWeight.w800,
+          fontSize: 32,
+        ),
+        headlineMedium: TextStyle(
+          color: BdaColors.textDark,
+          fontWeight: FontWeight.bold,
+          fontSize: 24,
+        ),
+        titleLarge: TextStyle(
+          color: BdaColors.textDark,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
         bodyLarge: TextStyle(color: BdaColors.textDark, fontSize: 16),
         bodyMedium: TextStyle(color: BdaColors.textDark, fontSize: 14),
       ),
@@ -65,7 +77,10 @@ class BdaTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: BdaColors.red, width: 2),
         ),
-        labelStyle: const TextStyle(color: BdaColors.navy, fontWeight: FontWeight.w600),
+        labelStyle: const TextStyle(
+          color: BdaColors.navy,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

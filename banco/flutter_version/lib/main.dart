@@ -10,13 +10,13 @@ import 'models/player_lead.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Bloquear orientación en vertical (Portrait)
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   // Inicializar almacenamiento local
   final storage = LocalStorageService();
   await storage.init();
@@ -33,9 +33,7 @@ class MyApp extends StatelessWidget {
       title: 'Banco del Austro - Fan Fest Mundialista',
       debugShowCheckedModeBanner: false,
       theme: BdaTheme.lightTheme,
-      home: const KioskScaleWrapper(
-        child: KioskFlowNavigator(),
-      ),
+      home: const KioskScaleWrapper(child: KioskFlowNavigator()),
     );
   }
 }
@@ -49,7 +47,8 @@ class KioskScaleWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Fondo negro para márgenes (si la pantalla no es 9:16)
+      backgroundColor:
+          Colors.black, // Fondo negro para márgenes (si la pantalla no es 9:16)
       body: Center(
         child: AspectRatio(
           aspectRatio: 9 / 16,
@@ -58,9 +57,7 @@ class KioskScaleWrapper extends StatelessWidget {
             child: SizedBox(
               width: 540,
               height: 960,
-              child: ClipRect(
-                child: child,
-              ),
+              child: ClipRect(child: child),
             ),
           ),
         ),
@@ -78,7 +75,8 @@ class KioskFlowNavigator extends StatefulWidget {
 }
 
 class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
-  String _currentScreen = 'registration'; // registration, menu, game, leaderboard
+  String _currentScreen =
+      'registration'; // registration, menu, game, leaderboard
   PlayerLead? _currentPlayer;
   String _activeGameType = 'penalty'; // penalty, keepie, reflex
 
@@ -105,11 +103,11 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
         score: score,
         gameType: _activeGameType,
       );
-      
+
       // Actualizar puntaje del jugador actual para mostrar en el leaderboard
       _currentPlayer!.score = score;
     }
-    
+
     setState(() {
       _currentScreen = 'leaderboard';
     });

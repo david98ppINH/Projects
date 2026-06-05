@@ -31,10 +31,13 @@ class MenuScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 50),
-              
+
               // Información del jugador registrado
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: BdaColors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -56,7 +59,11 @@ class MenuScreen extends StatelessWidget {
                         color: BdaColors.navy,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.sports_soccer, color: BdaColors.gold, size: 26),
+                      child: const Icon(
+                        Icons.sports_soccer,
+                        color: BdaColors.gold,
+                        size: 26,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -86,9 +93,9 @@ class MenuScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 50),
-              
+
               const Text(
                 'SELECCIONA TU DESAFÍO',
                 textAlign: TextAlign.center,
@@ -109,9 +116,9 @@ class MenuScreen extends StatelessWidget {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Lista de juegos
               Expanded(
                 child: ListView(
@@ -121,16 +128,17 @@ class MenuScreen extends StatelessWidget {
                     _buildGameCard(
                       context,
                       title: 'PENALES DE ORO',
-                      description: 'Arrastra el dedo para patear el balón, esquiva la estirada del arquero y anota todos los goles que puedas.',
+                      description:
+                          'Arrastra el dedo para patear el balón, esquiva la estirada del arquero y anota todos los goles que puedas.',
                       icon: Icons.sports_soccer,
                       color: BdaColors.red,
                       isActive: true,
                       onTap: () => onSelectGame('penalty'),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Juego 2: Dominadas Tricolor (BLOQUEADO/DEMO)
-                   /*  _buildGameCard(
+                    /*  _buildGameCard(
                       context,
                       title: 'DOMINADAS TRICOLOR',
                       description: 'Toca repetidamente el balón antes de que toque el césped para mantenerlo en el aire y sumar puntos.',
@@ -141,12 +149,13 @@ class MenuScreen extends StatelessWidget {
                       onTap: () {},
                     ),
                     const SizedBox(height: 20), */
-                    
+
                     // Juego 3: Reflejos de Arco (ACTIVO)
                     _buildGameCard(
                       context,
                       title: 'REFLEJOS DE ARCO',
-                      description: 'Toca rápidamente los logos del Austro que se iluminan antes de que se agote el tiempo.',
+                      description:
+                          'Toca rápidamente los logos del Austro que se iluminan antes de que se agote el tiempo.',
                       icon: Icons.bolt,
                       color: BdaColors.navy,
                       isActive: true,
@@ -155,7 +164,7 @@ class MenuScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Botón inferior para registrar a otro jugador
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0, top: 12.0),
@@ -251,7 +260,10 @@ class MenuScreen extends StatelessWidget {
                         ),
                         if (tagText != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: BdaColors.lightGrey,
                               borderRadius: BorderRadius.circular(6),

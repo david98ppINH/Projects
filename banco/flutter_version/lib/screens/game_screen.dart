@@ -21,13 +21,14 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateMixin {
+class _GameScreenState extends State<GameScreen>
+    with SingleTickerProviderStateMixin {
   late FlameGame _game;
   int _score = 0;
-  
+
   // Específico de Penales
   int _attempts = 0;
-  
+
   // Específico de Reflejos
   int _lives = 3;
   int _remainingTime = ReflexGame.gameDurationSeconds;
@@ -43,13 +44,13 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    
+
     // Configurar animación para mensajes gigantes de overlay
     _messageAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    
+
     _scaleAnimation = CurvedAnimation(
       parent: _messageAnimationController,
       curve: Curves.elasticOut,
@@ -105,7 +106,7 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
       _showMessage = true;
     });
     _messageAnimationController.forward(from: 0.0);
-    
+
     // Ocultar mensaje después de 1.1 segundos
     Future.delayed(const Duration(milliseconds: 1100), () {
       _safeSetState(() {
@@ -235,7 +236,9 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
                               padding: const EdgeInsets.only(left: 3.0),
                               child: Icon(
                                 Icons.sports_soccer,
-                                color: index < _lives ? BdaColors.red : Colors.grey[300],
+                                color: index < _lives
+                                    ? BdaColors.red
+                                    : Colors.grey[300],
                                 size: 14,
                               ),
                             );
@@ -274,16 +277,23 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
               child: ScaleTransition(
                 scale: _scaleAnimation,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 20,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: (_hudMessage == '¡GOLAZO!' || _hudMessage == '¡TOQUE!')
+                      color:
+                          (_hudMessage == '¡GOLAZO!' ||
+                              _hudMessage == '¡TOQUE!')
                           ? BdaColors.navy
-                          : (_hudMessage == '¡ATAJADA!' || _hudMessage == '¡FALLO!' || _hudMessage == '¡SIN VIDAS!'
-                              ? BdaColors.red
-                              : Colors.grey),
+                          : (_hudMessage == '¡ATAJADA!' ||
+                                    _hudMessage == '¡FALLO!' ||
+                                    _hudMessage == '¡SIN VIDAS!'
+                                ? BdaColors.red
+                                : Colors.grey),
                       width: 4,
                     ),
                     boxShadow: [
@@ -299,11 +309,15 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.w900,
-                      color: (_hudMessage == '¡GOLAZO!' || _hudMessage == '¡TOQUE!')
+                      color:
+                          (_hudMessage == '¡GOLAZO!' ||
+                              _hudMessage == '¡TOQUE!')
                           ? BdaColors.navy
-                          : (_hudMessage == '¡ATAJADA!' || _hudMessage == '¡FALLO!' || _hudMessage == '¡SIN VIDAS!'
-                              ? BdaColors.red
-                              : Colors.grey[700]),
+                          : (_hudMessage == '¡ATAJADA!' ||
+                                    _hudMessage == '¡FALLO!' ||
+                                    _hudMessage == '¡SIN VIDAS!'
+                                ? BdaColors.red
+                                : Colors.grey[700]),
                       letterSpacing: 2,
                     ),
                   ),
@@ -312,14 +326,20 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
             ),
 
           // 5. Ayuda Visual Táctil para Deslizamiento (Solo en Penales al inicio)
-          if (!isReflex && _attempts == 0 && !_penaltyGame.isKicked && !_penaltyGame.isDragging)
+          if (!isReflex &&
+              _attempts == 0 &&
+              !_penaltyGame.isKicked &&
+              !_penaltyGame.isDragging)
             Positioned(
               bottom: 220,
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: BdaColors.navy.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(20),

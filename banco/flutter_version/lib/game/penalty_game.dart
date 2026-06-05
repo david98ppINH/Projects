@@ -15,22 +15,22 @@ class PenaltyGame extends FlameGame {
   double ballVy = 0.0;
   double ballVz = 0.0;
   bool isKicked = false;
-  
+
   double goalieX = logicalWidth / 2;
   double goalieY = logicalHeight * 0.35;
   double goalieTargetX = logicalWidth / 2;
   double goalieTargetY = logicalHeight * 0.35;
-  final double goalieSpeed = 0.12; // Agilidad de la IA
-  
+  final double goalieSpeed = 0.09; // Agilidad de la IA
+
   // HUD y Sesión
   int score = 0;
   int attempts = 0;
   static const int maxAttempts = 5;
-  
+
   // Feedback
   String displayMessage = '';
   int displayMessageDuration = 0; // en ciclos
-  
+
   // Arrastre/Tiro
   Offset? swipeStart;
   Offset? swipeCurrent;
@@ -86,11 +86,11 @@ class PenaltyGame extends FlameGame {
   void handleSwipeEnd() {
     if (!isDragging || swipeStart == null || swipeCurrent == null) return;
     isDragging = false;
-    
+
     final start = swipeStart!;
     final end = swipeCurrent!;
     final vector = end - start;
-    
+
     // Validar arrastre: distancia mínima y dirección ascendente
     if (vector.distance > 20 && end.dy < start.dy) {
       // Aplicar multiplicadores a las físicas para compensar pantallas de 55"
@@ -102,9 +102,12 @@ class PenaltyGame extends FlameGame {
       // Calcular estirada del arquero inteligente basada en el tiro
       // La IA predice a dónde va a llegar la bola e intenta cubrir esa área
       goalieTargetX = end.dx.clamp(logicalWidth * 0.22, logicalWidth * 0.78);
-      goalieTargetY = (end.dy * 0.7).clamp(logicalHeight * 0.22, logicalHeight * 0.48);
+      goalieTargetY = (end.dy * 0.7).clamp(
+        logicalHeight * 0.22,
+        logicalHeight * 0.48,
+      );
     }
-    
+
     swipeStart = null;
     swipeCurrent = null;
   }
@@ -112,7 +115,7 @@ class PenaltyGame extends FlameGame {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     if (isKicked) {
       // Actualizar física del balón (2.5D)
       ballX += ballVx;
@@ -140,8 +143,10 @@ class PenaltyGame extends FlameGame {
 
     // Calcular distancia al arquero
     final goalieWidth = logicalWidth * 0.09;
-    
-    final distToGoalie = sqrt(pow(ballX - goalieX, 2) + pow(ballY - goalieY, 2));
+
+    final distToGoalie = sqrt(
+      pow(ballX - goalieX, 2) + pow(ballY - goalieY, 2),
+    );
 
     // Radio de colisión ampliado en 1.5x por regla de vidrio grueso
     final collisionRadius = goalieWidth * 1.5;
@@ -149,7 +154,10 @@ class PenaltyGame extends FlameGame {
     if (distToGoalie < collisionRadius) {
       // ATAJADA
       onMessageTrigger('¡ATAJADA!');
-    } else if (ballX > gLeft && ballX < gRight && ballY > gTop && ballY < gBottom) {
+    } else if (ballX > gLeft &&
+        ballX < gRight &&
+        ballY > gTop &&
+        ballY < gBottom) {
       // GOL
       score++;
       onMessageTrigger('¡GOLAZO!');
@@ -177,7 +185,7 @@ class PenaltyGame extends FlameGame {
     super.render(canvas);
     // 1. Dibujar el césped y gradas
     drawStadium(canvas);
-    
+
     // 2. Dibujar portería
     drawGoalPost(canvas);
 
@@ -194,7 +202,7 @@ class PenaltyGame extends FlameGame {
         ..strokeWidth = 6
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(swipeStart!, swipeCurrent!, paint);
-      
+
       final pointerPaint = Paint()..color = const Color(0xFFE4002B);
       canvas.drawCircle(swipeCurrent!, 10, pointerPaint);
     }
@@ -203,11 +211,17 @@ class PenaltyGame extends FlameGame {
   void drawStadium(Canvas canvas) {
     // Fondo grisáceo
     final bgPaint = Paint()..color = const Color(0xFFF0F2F5);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight), bgPaint);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight),
+      bgPaint,
+    );
 
     // Gradas
     final standsPaint = Paint()..color = const Color(0xFFE2E8F0);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight * 0.4), standsPaint);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight * 0.4),
+      standsPaint,
+    );
 
     final standsBndPaint = Paint()..color = const Color(0xFFCBD5E1);
     final pathStands = Path()
@@ -220,7 +234,15 @@ class PenaltyGame extends FlameGame {
 
     // Valla Publicitaria
     final adBoardPaint = Paint()..color = const Color(0xFF00205B);
-    canvas.drawRect(const Rect.fromLTWH(0, logicalHeight * 0.38, logicalWidth, logicalHeight * 0.05), adBoardPaint);
+    canvas.drawRect(
+      const Rect.fromLTWH(
+        0,
+        logicalHeight * 0.38,
+        logicalWidth,
+        logicalHeight * 0.05,
+      ),
+      adBoardPaint,
+    );
 
     // Césped
     final fieldPaint = Paint()..color = const Color(0xFF4CAF50);
@@ -237,7 +259,7 @@ class PenaltyGame extends FlameGame {
       ..color = Colors.white.withOpacity(0.8)
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
-    
+
     final pathArea = Path()
       ..moveTo(logicalWidth * 0.05, logicalHeight)
       ..lineTo(logicalWidth * 0.2, logicalHeight * 0.43)
@@ -267,7 +289,7 @@ class PenaltyGame extends FlameGame {
     final double gRight = logicalWidth * 0.8;
     final double gTop = logicalHeight * 0.2;
     final double gBottom = logicalHeight * 0.55;
-    
+
     // Dibujar malla horizontal y vertical
     final double stepX = (gRight - gLeft) / 20;
     final double stepY = (gBottom - gTop) / 12;
@@ -324,7 +346,11 @@ class PenaltyGame extends FlameGame {
       ..style = PaintingStyle.stroke;
 
     final rectBody = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset.zero, width: goalieWidth, height: goalieHeight * 0.9),
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: goalieWidth,
+        height: goalieHeight * 0.9,
+      ),
       const Radius.circular(10),
     );
     canvas.drawRRect(rectBody, bodyPaint);
@@ -332,13 +358,29 @@ class PenaltyGame extends FlameGame {
 
     // Guantes de portero (Dorado/Oro BDA)
     final glovesPaint = Paint()..color = const Color(0xFFFFB81C);
-    canvas.drawCircle(Offset(-goalieWidth * 0.65, -goalieHeight * 0.1), goalieWidth * 0.16, glovesPaint);
-    canvas.drawCircle(Offset(goalieWidth * 0.65, -goalieHeight * 0.1), goalieWidth * 0.16, glovesPaint);
+    canvas.drawCircle(
+      Offset(-goalieWidth * 0.65, -goalieHeight * 0.1),
+      goalieWidth * 0.16,
+      glovesPaint,
+    );
+    canvas.drawCircle(
+      Offset(goalieWidth * 0.65, -goalieHeight * 0.1),
+      goalieWidth * 0.16,
+      glovesPaint,
+    );
 
     // Cabeza
     final headPaint = Paint()..color = const Color(0xFFFFCC80);
-    canvas.drawCircle(Offset(0, -goalieHeight * 0.65), goalieWidth * 0.26, headPaint);
-    canvas.drawCircle(Offset(0, -goalieHeight * 0.65), goalieWidth * 0.26, borderPaint);
+    canvas.drawCircle(
+      Offset(0, -goalieHeight * 0.65),
+      goalieWidth * 0.26,
+      headPaint,
+    );
+    canvas.drawCircle(
+      Offset(0, -goalieHeight * 0.65),
+      goalieWidth * 0.26,
+      borderPaint,
+    );
 
     // Pelo / Detalle
     final hairPaint = Paint()..color = const Color(0xFF1E293B);
@@ -364,8 +406,10 @@ class PenaltyGame extends FlameGame {
 
     // Sombra del balón
     final shadowOffset = ballZ * 42.0;
-    final double shadowOpacity = (120.0 - ballZ * 80.0).clamp(0.0, 120.0) / 255.0;
-    final shadowPaint = Paint()..color = Colors.black.withOpacity(shadowOpacity);
+    final double shadowOpacity =
+        (120.0 - ballZ * 80.0).clamp(0.0, 120.0) / 255.0;
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(shadowOpacity);
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(0, radius + shadowOffset),
@@ -388,12 +432,28 @@ class PenaltyGame extends FlameGame {
     // Dibujar gajos hexagonales (Negros)
     final patchPaint = Paint()..color = const Color(0xFF091526);
     canvas.drawCircle(Offset.zero, radius * 0.46, patchPaint);
-    
+
     // Gajos laterales simplificados
-    canvas.drawCircle(Offset(-radius * 0.6, -radius * 0.4), radius * 0.24, patchPaint);
-    canvas.drawCircle(Offset(radius * 0.6, -radius * 0.4), radius * 0.24, patchPaint);
-    canvas.drawCircle(Offset(-radius * 0.6, radius * 0.4), radius * 0.24, patchPaint);
-    canvas.drawCircle(Offset(radius * 0.6, radius * 0.4), radius * 0.24, patchPaint);
+    canvas.drawCircle(
+      Offset(-radius * 0.6, -radius * 0.4),
+      radius * 0.24,
+      patchPaint,
+    );
+    canvas.drawCircle(
+      Offset(radius * 0.6, -radius * 0.4),
+      radius * 0.24,
+      patchPaint,
+    );
+    canvas.drawCircle(
+      Offset(-radius * 0.6, radius * 0.4),
+      radius * 0.24,
+      patchPaint,
+    );
+    canvas.drawCircle(
+      Offset(radius * 0.6, radius * 0.4),
+      radius * 0.24,
+      patchPaint,
+    );
     canvas.drawCircle(Offset(0, -radius * 0.7), radius * 0.22, patchPaint);
     canvas.drawCircle(Offset(0, radius * 0.7), radius * 0.22, patchPaint);
 

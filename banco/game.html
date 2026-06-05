@@ -1032,7 +1032,8 @@
           portalId: "41516556",
           formId: "ad6aa7df-8392-4808-8864-e905be4582d3",
           region: "na1",
-          target: "#hubspot-form-container"
+          target: "#hubspot-form-container",
+          inlineMessage: "Gracias por registrarte."
         });
       }
     }
@@ -1047,15 +1048,25 @@
         let identificacion = "";
 
         // Extraer los valores de los campos enviados
-        if (submissionData && Array.isArray(submissionData)) {
-          submissionData.forEach(field => {
-            if (field.name === 'email') email = field.value;
-            if (field.name === 'firstname') firstName = field.value;
-            if (field.name === 'lastname') lastName = field.value;
-            if (field.name === 'cedula' || field.name === 'identificacion' || field.name === 'num_cedula') {
-              identificacion = field.value;
+        if (submissionData) {
+          if (Array.isArray(submissionData)) {
+            submissionData.forEach(field => {
+              if (field.name === 'email') email = field.value;
+              if (field.name === 'firstname') firstName = field.value;
+              if (field.name === 'lastname') lastName = field.value;
+              if (field.name === 'cedula' || field.name === 'identificacion' || field.name === 'num_cedula') {
+                identificacion = field.value;
+              }
+            });
+          } else {
+            const vals = submissionData.submissionValues || submissionData;
+            if (vals && typeof vals === 'object') {
+              email = vals.email || vals.correo || vals.mail || email;
+              firstName = vals.firstname || vals.first_name || vals.firstName || vals.nombre || vals.nombres || vals.name || firstName;
+              lastName = vals.lastname || vals.last_name || vals.lastName || vals.apellido || vals.apellidos || lastName;
+              identificacion = vals.identificacion || vals.cedula || vals.num_cedula || vals.identificación || vals.documento || vals.id || identificacion;
             }
-          });
+          }
         }
 
         playerProfile = {

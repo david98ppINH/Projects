@@ -31,6 +31,75 @@
 
   <title>flutter_version</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- HubSpot Forms Embed JS -->
+  <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/embed/v2.js"></script>
+  <script>
+    window.initHubspotForm = function(targetId) {
+      // Intentar limpiar primero el contenedor si tuviera elementos anteriores
+      var container = document.getElementById(targetId);
+      if (container) {
+        container.innerHTML = '';
+      }
+      if (window.hbspt) {
+        window.hbspt.forms.create({
+          portalId: "41516556",
+          formId: "ad6aa7df-8392-4808-8864-e905be4582d3",
+          region: "na1",
+          target: '#' + targetId,
+          inlineMessage: "Gracias por registrarte."
+        });
+      }
+    };
+
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'hsFormCallback' && event.data.eventName === 'onFormSubmitted') {
+        const submissionData = event.data.data;
+        console.log("HubSpot Form Submitted. Fields data:", JSON.stringify(submissionData));
+        
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        let identificacion = "";
+
+        if (submissionData) {
+          if (Array.isArray(submissionData)) {
+            submissionData.forEach(function(field) {
+              var name = (field.name || '').toLowerCase();
+              var val = field.value || '';
+              
+              if (name === 'email' || name === 'correo' || name === 'mail') {
+                email = val;
+              } else if (name === 'firstname' || name === 'first_name' || name === 'nombre' || name === 'nombres' || name === 'name') {
+                firstName = val;
+              } else if (name === 'lastname' || name === 'last_name' || name === 'apellido' || name === 'apellidos') {
+                lastName = val;
+              } else if (name === 'cedula' || name === 'identificacion' || name === 'num_cedula' || name === 'identificación' || name === 'documento' || name === 'id') {
+                identificacion = val;
+              }
+            });
+          } else {
+            const vals = submissionData.submissionValues || submissionData;
+            if (vals && typeof vals === 'object') {
+              email = vals.email || vals.correo || vals.mail || email;
+              firstName = vals.firstname || vals.first_name || vals.firstName || vals.nombre || vals.nombres || vals.name || firstName;
+              lastName = vals.lastname || vals.last_name || vals.lastName || vals.apellido || vals.apellidos || lastName;
+              identificacion = vals.identificacion || vals.cedula || vals.num_cedula || vals.identificación || vals.documento || vals.id || identificacion;
+            }
+          }
+        }
+
+        if (window.onHubspotSubmitted) {
+          window.onHubspotSubmitted(JSON.stringify({
+            firstName: firstName || 'Jugador',
+            lastName: lastName || '',
+            email: email || '',
+            identificacion: identificacion || '0000000000'
+          }));
+        }
+      }
+    });
+  </script>
 </head>
 <body>
   <!--

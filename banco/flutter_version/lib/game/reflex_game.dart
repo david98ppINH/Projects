@@ -9,11 +9,7 @@ class ReflexTarget {
   String? feedbackState; // 'SUCCESS', 'FAILURE', or null
   int feedbackTimer = 0; // en fotogramas
 
-  ReflexTarget({
-    required this.x,
-    required this.y,
-    required this.radius,
-  });
+  ReflexTarget({required this.x, required this.y, required this.radius});
 }
 
 class ReflexGame extends FlameGame {
@@ -52,10 +48,10 @@ class ReflexGame extends FlameGame {
     startTimeSeconds = DateTime.now().millisecondsSinceEpoch / 1000.0;
     lastSpawnTimeSeconds = startTimeSeconds;
     currentTargetDurationSeconds = baseTargetDurationSeconds;
-    
+
     _initializeTargets();
     _spawnNewTarget();
-    
+
     // Notificación inicial
     onProgressUpdate(score, lives, gameDurationSeconds);
   }
@@ -64,12 +60,36 @@ class ReflexGame extends FlameGame {
     const double radius = 55.0;
     // 6 posiciones de sensores táctiles
     targets = [
-      ReflexTarget(x: logicalWidth * 0.22, y: logicalHeight * 0.40, radius: radius), // Alto Izquierda
-      ReflexTarget(x: logicalWidth * 0.50, y: logicalHeight * 0.32, radius: radius), // Alto Centro
-      ReflexTarget(x: logicalWidth * 0.78, y: logicalHeight * 0.40, radius: radius), // Alto Derecha
-      ReflexTarget(x: logicalWidth * 0.22, y: logicalHeight * 0.65, radius: radius), // Bajo Izquierda
-      ReflexTarget(x: logicalWidth * 0.50, y: logicalHeight * 0.73, radius: radius), // Bajo Centro
-      ReflexTarget(x: logicalWidth * 0.78, y: logicalHeight * 0.65, radius: radius), // Bajo Derecha
+      ReflexTarget(
+        x: logicalWidth * 0.22,
+        y: logicalHeight * 0.40,
+        radius: radius,
+      ), // Alto Izquierda
+      ReflexTarget(
+        x: logicalWidth * 0.50,
+        y: logicalHeight * 0.32,
+        radius: radius,
+      ), // Alto Centro∏
+      ReflexTarget(
+        x: logicalWidth * 0.78,
+        y: logicalHeight * 0.40,
+        radius: radius,
+      ), // Alto Derecha
+      ReflexTarget(
+        x: logicalWidth * 0.22,
+        y: logicalHeight * 0.65,
+        radius: radius,
+      ), // Bajo Izquierda
+      ReflexTarget(
+        x: logicalWidth * 0.50,
+        y: logicalHeight * 0.73,
+        radius: radius,
+      ), // Bajo Centro
+      ReflexTarget(
+        x: logicalWidth * 0.78,
+        y: logicalHeight * 0.65,
+        radius: radius,
+      ), // Bajo Derecha
     ];
   }
 
@@ -77,17 +97,18 @@ class ReflexGame extends FlameGame {
     final random = Random();
     int prevIndex = activeTargetIndex;
     int newIndex = prevIndex;
-    
+
     // Asegurar que salga un sensor diferente al anterior
     while (newIndex == prevIndex) {
       newIndex = random.nextInt(targets.length);
     }
-    
+
     activeTargetIndex = newIndex;
     lastSpawnTimeSeconds = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    
+
     // Incremento de dificultad más agresivo: reduce 0.08s por acierto hasta un mínimo de 0.40s
-    currentTargetDurationSeconds = (baseTargetDurationSeconds - (score * 0.08)).clamp(0.40, baseTargetDurationSeconds);
+    currentTargetDurationSeconds = (baseTargetDurationSeconds - (score * 0.08))
+        .clamp(0.40, baseTargetDurationSeconds);
   }
 
   void handleTap(Offset localPosition) {
@@ -101,8 +122,10 @@ class ReflexGame extends FlameGame {
 
     for (int i = 0; i < targets.length; i++) {
       final t = targets[i];
-      final distance = sqrt(pow(localPosition.dx - t.x, 2) + pow(localPosition.dy - t.y, 2));
-      
+      final distance = sqrt(
+        pow(localPosition.dx - t.x, 2) + pow(localPosition.dy - t.y, 2),
+      );
+
       if (distance <= t.radius * collisionMultiplier) {
         if (i == activeTargetIndex) {
           hitActive = true;
@@ -115,19 +138,19 @@ class ReflexGame extends FlameGame {
 
     if (hitActive) {
       score++;
-      
+
       // Feedback exitoso (Verde) en el sensor presionado por medio segundo (~30 frames)
       targets[activeTargetIndex].feedbackState = 'SUCCESS';
-      targets[activeTargetIndex].feedbackTimer = 30; 
-      
+      targets[activeTargetIndex].feedbackTimer = 30;
+
       _spawnNewTarget();
     } else if (hitInactiveIndex != -1) {
       lives--;
-      
+
       // Feedback erróneo (Rojo) en el sensor presionado
       targets[hitInactiveIndex].feedbackState = 'FAILURE';
       targets[hitInactiveIndex].feedbackTimer = 25; // mostrar por 25 fotogramas
-      
+
       onMessageTrigger('¡FALLO!');
       if (lives <= 0) {
         _endGame('¡SIN VIDAS!');
@@ -140,15 +163,18 @@ class ReflexGame extends FlameGame {
   void _endGame(String reasonMessage) {
     if (isGameOverTriggered) return;
     isGameOverTriggered = true;
-    
+
     // Notificar el último estado (ej. vidas = 0) a la interfaz Flutter antes de pausar actualizaciones
     final now = DateTime.now().millisecondsSinceEpoch / 1000.0;
     final elapsedGameTime = now - startTimeSeconds;
-    final remainingTime = (gameDurationSeconds - elapsedGameTime).ceil().clamp(0, gameDurationSeconds);
+    final remainingTime = (gameDurationSeconds - elapsedGameTime).ceil().clamp(
+      0,
+      gameDurationSeconds,
+    );
     onProgressUpdate(score, lives, remainingTime);
 
     onMessageTrigger(reasonMessage);
-    
+
     Future.delayed(const Duration(milliseconds: 1400), () {
       onGameOver(score);
     });
@@ -160,11 +186,14 @@ class ReflexGame extends FlameGame {
     if (isGameOverTriggered) return;
 
     final now = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    
+
     // 1. Control del tiempo del juego
     final elapsedGameTime = now - startTimeSeconds;
-    final remainingTime = (gameDurationSeconds - elapsedGameTime).ceil().clamp(0, gameDurationSeconds);
-    
+    final remainingTime = (gameDurationSeconds - elapsedGameTime).ceil().clamp(
+      0,
+      gameDurationSeconds,
+    );
+
     onProgressUpdate(score, lives, remainingTime);
 
     if (remainingTime <= 0) {
@@ -176,7 +205,7 @@ class ReflexGame extends FlameGame {
     final timeSinceSpawn = now - lastSpawnTimeSeconds;
     if (timeSinceSpawn > currentTargetDurationSeconds) {
       lives--;
-      
+
       // Registrar falla en el sensor activo por expirar
       if (activeTargetIndex != -1) {
         targets[activeTargetIndex].feedbackState = 'FAILURE';
@@ -218,11 +247,17 @@ class ReflexGame extends FlameGame {
   void _drawStadiumBackground(Canvas canvas) {
     // Fondo grisáceo
     final bgPaint = Paint()..color = const Color(0xFFF0F2F5);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight), bgPaint);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight),
+      bgPaint,
+    );
 
     // Gradas
     final standsPaint = Paint()..color = const Color(0xFFE2E8F0);
-    canvas.drawRect(const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight * 0.4), standsPaint);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight * 0.4),
+      standsPaint,
+    );
 
     final standsBndPaint = Paint()..color = const Color(0xFFCBD5E1);
     final pathStands = Path()
@@ -235,7 +270,15 @@ class ReflexGame extends FlameGame {
 
     // Valla Publicitaria del BDA
     final adBoardPaint = Paint()..color = const Color(0xFF00205B);
-    canvas.drawRect(const Rect.fromLTWH(0, logicalHeight * 0.38, logicalWidth, logicalHeight * 0.05), adBoardPaint);
+    canvas.drawRect(
+      const Rect.fromLTWH(
+        0,
+        logicalHeight * 0.38,
+        logicalWidth,
+        logicalHeight * 0.05,
+      ),
+      adBoardPaint,
+    );
 
     // Césped
     final fieldPaint = Paint()..color = const Color(0xFF4CAF50);
@@ -252,7 +295,7 @@ class ReflexGame extends FlameGame {
       ..color = Colors.white.withOpacity(0.8)
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
-    
+
     final pathArea = Path()
       ..moveTo(logicalWidth * 0.05, logicalHeight)
       ..lineTo(logicalWidth * 0.2, logicalHeight * 0.43)
@@ -285,7 +328,7 @@ class ReflexGame extends FlameGame {
 
   void _drawSensors(Canvas canvas) {
     final tick = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    
+
     for (int i = 0; i < targets.length; i++) {
       final t = targets[i];
       final isActive = (i == activeTargetIndex && !isGameOverTriggered);
@@ -316,8 +359,10 @@ class ReflexGame extends FlameGame {
           textDirection: TextDirection.ltr,
         );
         checkPainter.layout();
-        checkPainter.paint(canvas, Offset(-checkPainter.width / 2, -checkPainter.height / 2 - 2));
-
+        checkPainter.paint(
+          canvas,
+          Offset(-checkPainter.width / 2, -checkPainter.height / 2 - 2),
+        );
       } else if (t.feedbackState == 'FAILURE') {
         // Dibujar sensor fallido (Rojo)
         final failurePaint = Paint()..color = const Color(0xFFE4002B);
@@ -341,14 +386,17 @@ class ReflexGame extends FlameGame {
           textDirection: TextDirection.ltr,
         );
         crossPainter.layout();
-        crossPainter.paint(canvas, Offset(-crossPainter.width / 2, -crossPainter.height / 2 - 2));
-
+        crossPainter.paint(
+          canvas,
+          Offset(-crossPainter.width / 2, -crossPainter.height / 2 - 2),
+        );
       } else if (isActive) {
         // Dibujar sensor activo con animación de pulso y diseño de marca "Austro"
         final double pulse = sin(tick * 12.0) * 6.0;
-        
+
         // Halo de brillo
-        final glowPaint = Paint()..color = const Color(0xFFFFB81C).withOpacity(0.35);
+        final glowPaint = Paint()
+          ..color = const Color(0xFFFFB81C).withOpacity(0.35);
         canvas.drawCircle(Offset.zero, t.radius + pulse + 12.0, glowPaint);
 
         // Círculo blanco central
@@ -380,7 +428,10 @@ class ReflexGame extends FlameGame {
           textDirection: TextDirection.ltr,
         );
         letterPainter.layout();
-        letterPainter.paint(canvas, Offset(-letterPainter.width / 2, -letterPainter.height / 2 - 6.0));
+        letterPainter.paint(
+          canvas,
+          Offset(-letterPainter.width / 2, -letterPainter.height / 2 - 6.0),
+        );
 
         // Subtexto "AUSTRO"
         final subtextPainter = TextPainter(
@@ -396,8 +447,10 @@ class ReflexGame extends FlameGame {
           textDirection: TextDirection.ltr,
         );
         subtextPainter.layout();
-        subtextPainter.paint(canvas, Offset(-subtextPainter.width / 2, t.radius * 0.4));
-
+        subtextPainter.paint(
+          canvas,
+          Offset(-subtextPainter.width / 2, t.radius * 0.4),
+        );
       } else {
         // Dibujar sensor inactivo (Semi-transparente)
         final inactivePaint = Paint()..color = Colors.white.withOpacity(0.6);
@@ -405,12 +458,13 @@ class ReflexGame extends FlameGame {
           ..color = const Color(0xFF00205B).withOpacity(0.2)
           ..strokeWidth = 3
           ..style = PaintingStyle.stroke;
-        
+
         canvas.drawCircle(Offset.zero, t.radius, inactivePaint);
         canvas.drawCircle(Offset.zero, t.radius, inactiveBorder);
 
         // Logotipo apagado
-        final innerPaint = Paint()..color = const Color(0xFF00205B).withOpacity(0.12);
+        final innerPaint = Paint()
+          ..color = const Color(0xFF00205B).withOpacity(0.12);
         canvas.drawCircle(Offset.zero, t.radius * 0.35, innerPaint);
       }
 

@@ -40,7 +40,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     await Future.delayed(const Duration(milliseconds: 500));
 
     final records = LocalStorageService().getLeaderboard(widget.gameType);
-    
+
     if (mounted) {
       setState(() {
         _records = records;
@@ -79,7 +79,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              
+
               // Copa Icono Animado
               const Center(
                 child: Icon(
@@ -89,7 +89,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               Text(
                 _getGameTitle(),
                 textAlign: TextAlign.center,
@@ -109,9 +109,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   color: Colors.grey,
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Tabla de Posiciones
               Expanded(
                 child: Container(
@@ -131,147 +131,170 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     borderRadius: BorderRadius.circular(20),
                     child: _isLoading
                         ? const Center(
-                            child: CircularProgressIndicator(color: BdaColors.red),
+                            child: CircularProgressIndicator(
+                              color: BdaColors.red,
+                            ),
                           )
                         : _records.isEmpty
-                            ? const Center(
-                                child: Text(
-                                  'Sin récords aún. ¡Sé el primero!',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
+                        ? const Center(
+                            child: Text(
+                              'Sin récords aún. ¡Sé el primero!',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              // Encabezados de tabla
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 14,
                                 ),
-                              )
-                            : Column(
-                                children: [
-                                  // Encabezados de tabla
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                                    color: BdaColors.lightBackground,
-                                    child: Row(
-                                      children: const [
-                                        SizedBox(
-                                          width: 50,
-                                          child: Text(
-                                            'POS',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                              color: BdaColors.navy,
-                                            ),
-                                          ),
+                                color: BdaColors.lightBackground,
+                                child: Row(
+                                  children: const [
+                                    SizedBox(
+                                      width: 50,
+                                      child: Text(
+                                        'POS',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w800,
+                                          color: BdaColors.navy,
                                         ),
-                                        Expanded(
-                                          child: Text(
-                                            'JUGADOR',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                              color: BdaColors.navy,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 70,
-                                          child: Text(
-                                            'RECORD',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w800,
-                                              color: BdaColors.navy,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                  
-                                  // Filas del Leaderboard
-                                  Expanded(
-                                    child: ListView.separated(
-                                      itemCount: _records.length > 8 ? 8 : _records.length,
-                                      separatorBuilder: (context, index) => const Divider(
+                                    Expanded(
+                                      child: Text(
+                                        'JUGADOR',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w800,
+                                          color: BdaColors.navy,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 70,
+                                      child: Text(
+                                        'RECORD',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w800,
+                                          color: BdaColors.navy,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Filas del Leaderboard
+                              Expanded(
+                                child: ListView.separated(
+                                  itemCount: _records.length > 8
+                                      ? 8
+                                      : _records.length,
+                                  separatorBuilder: (context, index) =>
+                                      const Divider(
                                         height: 1,
                                         color: BdaColors.lightGrey,
                                       ),
-                                      itemBuilder: (context, index) {
-                                        final record = _records[index];
-                                        final isTop3 = index < 3;
-                                        final isCurrentPlayer = widget.currentPlayer != null &&
-                                            record['firstName'] == widget.currentPlayer!.firstName &&
-                                            record['score'] == widget.currentPlayer!.score;
-                                            
-                                        // Icono de medalla
-                                        String medal = '';
-                                        if (index == 0) medal = '🏆';
-                                        if (index == 1) medal = '🥈';
-                                        if (index == 2) medal = '🥉';
+                                  itemBuilder: (context, index) {
+                                    final record = _records[index];
+                                    final isTop3 = index < 3;
+                                    final isCurrentPlayer =
+                                        widget.currentPlayer != null &&
+                                        record['firstName'] ==
+                                            widget.currentPlayer!.firstName &&
+                                        record['score'] ==
+                                            widget.currentPlayer!.score;
 
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                                          color: isCurrentPlayer
-                                              ? BdaColors.gold.withOpacity(0.15)
-                                              : (isTop3 ? BdaColors.navy.withOpacity(0.02) : null),
-                                          child: Row(
-                                            children: [
-                                              // Posición
-                                              SizedBox(
-                                                width: 50,
-                                                child: Text(
-                                                  medal.isNotEmpty ? medal : '${index + 1}',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: isTop3 ? BdaColors.red : BdaColors.navy,
-                                                  ),
-                                                ),
+                                    // Icono de medalla
+                                    String medal = '';
+                                    if (index == 0) medal = '🏆';
+                                    if (index == 1) medal = '🥈';
+                                    if (index == 2) medal = '🥉';
+
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 14,
+                                      ),
+                                      color: isCurrentPlayer
+                                          ? BdaColors.gold.withOpacity(0.15)
+                                          : (isTop3
+                                                ? BdaColors.navy.withOpacity(
+                                                    0.02,
+                                                  )
+                                                : null),
+                                      child: Row(
+                                        children: [
+                                          // Posición
+                                          SizedBox(
+                                            width: 50,
+                                            child: Text(
+                                              medal.isNotEmpty
+                                                  ? medal
+                                                  : '${index + 1}',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w900,
+                                                color: isTop3
+                                                    ? BdaColors.red
+                                                    : BdaColors.navy,
                                               ),
-                                              
-                                              // Jugador
-                                              Expanded(
-                                                child: Text(
-                                                  '${record['firstName']} ${record['lastName']}',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: isCurrentPlayer || isTop3
-                                                        ? FontWeight.w800
-                                                        : FontWeight.bold,
-                                                    color: BdaColors.navy,
-                                                  ),
-                                                ),
-                                              ),
-                                              
-                                              // Record
-                                              SizedBox(
-                                                width: 70,
-                                                child: Text(
-                                                  '${record['score']}',
-                                                  textAlign: TextAlign.center,
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: BdaColors.navy,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
+
+                                          // Jugador
+                                          Expanded(
+                                            child: Text(
+                                              '${record['firstName']} ${record['lastName']}',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight:
+                                                    isCurrentPlayer || isTop3
+                                                    ? FontWeight.w800
+                                                    : FontWeight.bold,
+                                                color: BdaColors.navy,
+                                              ),
+                                            ),
+                                          ),
+
+                                          // Record
+                                          SizedBox(
+                                            width: 70,
+                                            child: Text(
+                                              '${record['score']}',
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w900,
+                                                color: BdaColors.navy,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
+                            ],
+                          ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Botones Inferiores Ergonómicos en el tercio inferior
               Row(
                 children: [
@@ -291,7 +314,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       ),
                       child: ElevatedButton.icon(
                         onPressed: widget.onChangeGame,
-                        icon: const Icon(Icons.gamepad, color: Colors.white, size: 20),
+                        icon: const Icon(
+                          Icons.gamepad,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                         label: const Text(
                           'CAMBIAR JUEGO',
                           style: TextStyle(
@@ -327,7 +354,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                       ),
                       child: ElevatedButton.icon(
                         onPressed: widget.onRestartSession,
-                        icon: const Icon(Icons.refresh, color: BdaColors.navy, size: 20),
+                        icon: const Icon(
+                          Icons.refresh,
+                          color: BdaColors.navy,
+                          size: 20,
+                        ),
                         label: const Text(
                           'SIGUIENTE TURNO',
                           style: TextStyle(
