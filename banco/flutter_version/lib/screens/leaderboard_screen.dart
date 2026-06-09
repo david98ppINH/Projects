@@ -129,7 +129,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     border: Border.all(color: BdaColors.lightGrey),
                     boxShadow: [
                       BoxShadow(
-                        color: BdaColors.navy.withOpacity(0.06),
+                        color: BdaColors.navy.withValues(alpha: 0.06),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
                       ),
@@ -248,10 +248,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                         vertical: 14,
                                       ),
                                       color: isCurrentPlayer
-                                          ? BdaColors.gold.withOpacity(0.15)
+                                          ? BdaColors.gold.withValues(alpha: 0.15)
                                           : (isTop3
-                                                ? BdaColors.navy.withOpacity(
-                                                    0.02,
+                                                ? BdaColors.navy.withValues(
+                                                    alpha: 0.02,
                                                   )
                                                 : null),
                                       child: Row(
@@ -341,7 +341,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: BdaColors.navy.withOpacity(0.2),
+                            color: BdaColors.navy.withValues(alpha: 0.2),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -381,7 +381,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: BdaColors.gold.withOpacity(0.3),
+                            color: BdaColors.gold.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),

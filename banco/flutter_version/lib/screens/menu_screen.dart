@@ -44,7 +44,7 @@ class MenuScreen extends StatelessWidget {
                   border: Border.all(color: BdaColors.lightGrey),
                   boxShadow: [
                     BoxShadow(
-                      color: BdaColors.navy.withOpacity(0.04),
+                      color: BdaColors.navy.withValues(alpha: 0.04),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -208,12 +208,12 @@ class MenuScreen extends StatelessWidget {
             color: BdaColors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isActive ? color.withOpacity(0.5) : BdaColors.lightGrey,
+              color: isActive ? color.withValues(alpha: 0.5) : BdaColors.lightGrey,
               width: isActive ? 2 : 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(isActive ? 0.08 : 0.02),
+                color: color.withValues(alpha: isActive ? 0.08 : 0.02),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -231,7 +231,7 @@ class MenuScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.3),
+                      color: color.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),

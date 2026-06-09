@@ -89,7 +89,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               width: 300,
               height: 300,
               decoration: BoxDecoration(
-                color: BdaColors.gold.withOpacity(0.08),
+                color: BdaColors.gold.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -101,7 +101,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               width: 250,
               height: 250,
               decoration: BoxDecoration(
-                color: BdaColors.navy.withOpacity(0.04),
+                color: BdaColors.navy.withValues(alpha: 0.04),
                 shape: BoxShape.circle,
               ),
             ),
@@ -120,7 +120,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     border: Border.all(color: BdaColors.lightGrey),
                     boxShadow: [
                       BoxShadow(
-                        color: BdaColors.navy.withOpacity(0.05),
+                        color: BdaColors.navy.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -177,7 +177,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: BdaColors.navy.withOpacity(0.12),
+                              color: BdaColors.navy.withValues(alpha: 0.12),
                               blurRadius: 30,
                               offset: const Offset(0, 15),
                             ),
@@ -243,7 +243,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   onPressed: _isLoading ? null : _submitForm,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: BdaColors.navy,
-                                    disabledBackgroundColor: BdaColors.navy.withOpacity(0.7),
+                                    disabledBackgroundColor: BdaColors.navy.withValues(alpha: 0.7),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
