@@ -9,6 +9,7 @@ import 'screens/game_screen.dart';
 import 'screens/leaderboard_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/registration_screen.dart';
+import 'screens/saving_screen.dart';
 import 'services/local_storage_service.dart';
 import 'theme/bda_theme.dart';
 
@@ -87,24 +88,14 @@ class KioskFlowNavigator extends StatefulWidget {
 }
 
 class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
-  late String _currentScreen; // registration, menu, game, leaderboard
+  late String _currentScreen; // registration, menu, game, saving, leaderboard
   PlayerLead? _currentPlayer;
   String _activeGameType = 'penalty'; // penalty, keepie, trivia
 
   @override
   void initState() {
     super.initState();
-    _currentScreen = 'menu';
-    _currentPlayer = PlayerLead(
-      id: 'temp_kiosk_user',
-      firstName: 'Invitado',
-      lastName: '',
-      email: 'invitado@banco.com',
-      identificacion: '9999999999',
-      score: 0,
-      gameType: 'penalty',
-      timestamp: DateTime.now().toIso8601String(),
-    );
+    _currentScreen = 'registration';
   }
 
   void _onRegister(PlayerLead player) {
@@ -122,6 +113,10 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
   }
 
   void _onGameFinished(int score, {int? timeElapsed}) async {
+    setState(() {
+      _currentScreen = 'saving';
+    });
+
     if (_currentPlayer != null) {
       // Actualizar en Firebase
       try {
@@ -153,6 +148,7 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
       _currentPlayer!.score = score;
     }
 
+    if (!mounted) return;
     setState(() {
       _currentScreen = 'leaderboard';
     });
@@ -197,6 +193,8 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
           gameType: _activeGameType,
           onGameFinished: _onGameFinished,
         );
+      case 'saving':
+        return SavingScoreScreen(gameType: _activeGameType);
       case 'leaderboard':
         return LeaderboardScreen(
           gameType: _activeGameType,
