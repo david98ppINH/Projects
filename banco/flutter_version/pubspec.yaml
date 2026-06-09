@@ -68,6 +68,7 @@ flutter:
     - assets/Pelota.webp
     - assets/arco.webp
     - assets/chancha.webp
+    - assets/Jugador.webp
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

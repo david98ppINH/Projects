@@ -128,6 +128,7 @@ class PenaltyGame extends FlameGame {
   ui.Image? ballSprite;
   ui.Image? goalSprite;
   ui.Image? pitchSprite;
+  ui.Image? goalieSprite;
 
   // Callbacks para comunicar con la interfaz Flutter
   final Function(int score, int attempts) onProgressUpdate;
@@ -150,6 +151,7 @@ class PenaltyGame extends FlameGame {
       ballSprite = await images.load('Pelota.webp');
       goalSprite = await images.load('arco.webp');
       pitchSprite = await images.load('chancha.webp');
+      goalieSprite = await images.load('Jugador.webp');
     } catch (e) {
       debugPrint('Error cargando sprites: $e');
     }
@@ -684,62 +686,75 @@ class PenaltyGame extends FlameGame {
       shadowPaint,
     );
 
-    // Uniforme (Azul Marino del BDA)
-    final bodyPaint = Paint()
-      ..color = const Color(0xFF00205B)
-      ..style = PaintingStyle.fill;
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke;
+    if (goalieSprite != null) {
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromCenter(
+          center: Offset.zero,
+          width: goalieWidth * 3.0,
+          height: goalieHeight * 1.1,
+        ),
+        image: goalieSprite!,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Uniforme (Azul Marino del BDA)
+      final bodyPaint = Paint()
+        ..color = const Color(0xFF00205B)
+        ..style = PaintingStyle.fill;
+      final borderPaint = Paint()
+        ..color = Colors.white
+        ..strokeWidth = 2.5
+        ..style = PaintingStyle.stroke;
 
-    final rectBody = RRect.fromRectAndRadius(
-      Rect.fromCenter(
-        center: Offset.zero,
-        width: goalieWidth,
-        height: goalieHeight * 0.9,
-      ),
-      const Radius.circular(10),
-    );
-    canvas.drawRRect(rectBody, bodyPaint);
-    canvas.drawRRect(rectBody, borderPaint);
+      final rectBody = RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset.zero,
+          width: goalieWidth,
+          height: goalieHeight * 0.9,
+        ),
+        const Radius.circular(10),
+      );
+      canvas.drawRRect(rectBody, bodyPaint);
+      canvas.drawRRect(rectBody, borderPaint);
 
-    // Guantes de portero (Dorado/Oro BDA)
-    final glovesPaint = Paint()..color = const Color(0xFFFFB81C);
-    canvas.drawCircle(
-      Offset(-goalieWidth * 0.65, -goalieHeight * 0.1),
-      goalieWidth * 0.16,
-      glovesPaint,
-    );
-    canvas.drawCircle(
-      Offset(goalieWidth * 0.65, -goalieHeight * 0.1),
-      goalieWidth * 0.16,
-      glovesPaint,
-    );
+      // Guantes de portero (Dorado/Oro BDA)
+      final glovesPaint = Paint()..color = const Color(0xFFFFB81C);
+      canvas.drawCircle(
+        Offset(-goalieWidth * 0.65, -goalieHeight * 0.1),
+        goalieWidth * 0.16,
+        glovesPaint,
+      );
+      canvas.drawCircle(
+        Offset(goalieWidth * 0.65, -goalieHeight * 0.1),
+        goalieWidth * 0.16,
+        glovesPaint,
+      );
 
-    // Cabeza
-    final headPaint = Paint()..color = const Color(0xFFFFCC80);
-    canvas.drawCircle(
-      Offset(0, -goalieHeight * 0.65),
-      goalieWidth * 0.26,
-      headPaint,
-    );
-    canvas.drawCircle(
-      Offset(0, -goalieHeight * 0.65),
-      goalieWidth * 0.26,
-      borderPaint,
-    );
+      // Cabeza
+      final headPaint = Paint()..color = const Color(0xFFFFCC80);
+      canvas.drawCircle(
+        Offset(0, -goalieHeight * 0.65),
+        goalieWidth * 0.26,
+        headPaint,
+      );
+      canvas.drawCircle(
+        Offset(0, -goalieHeight * 0.65),
+        goalieWidth * 0.26,
+        borderPaint,
+      );
 
-    // Pelo / Detalle
-    final hairPaint = Paint()..color = const Color(0xFF1E293B);
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(0, -goalieHeight * 0.84),
-        width: goalieWidth * 0.35,
-        height: goalieHeight * 0.15,
-      ),
-      hairPaint,
-    );
+      // Pelo / Detalle
+      final hairPaint = Paint()..color = const Color(0xFF1E293B);
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(0, -goalieHeight * 0.84),
+          width: goalieWidth * 0.35,
+          height: goalieHeight * 0.15,
+        ),
+        hairPaint,
+      );
+    }
 
     canvas.restore();
   }
