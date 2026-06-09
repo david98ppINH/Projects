@@ -52,9 +52,9 @@ class PenaltyGame extends FlameGame {
 
   Rect get billboardRect {
     return const Rect.fromLTWH(
-      logicalWidth * 0.025,
+      logicalWidth * 0.05,
       logicalHeight * 0.355,
-      logicalWidth * 0.95,
+      logicalWidth * 0.90,
       logicalHeight * 0.07,
     );
   }

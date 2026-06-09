@@ -64,11 +64,13 @@ class _GameScreenState extends State<GameScreen>
       curve: Curves.elasticOut,
     );
 
+    // Inicializar el video publicitario para ambos modos de juego
+    _initPenaltyVideo();
+
     // Inicializar el juego correspondiente
     if (widget.gameType == 'trivia') {
       _initTrivia();
     } else {
-      _initPenaltyVideo();
       _game = PenaltyGame(
         onProgressUpdate: (score, attempts) {
           _safeSetState(() {
@@ -454,7 +456,7 @@ class _GameScreenState extends State<GameScreen>
     if (_isVideoInitialized && _videoController != null) {
       return ClipRect(
         child: FittedBox(
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           child: SizedBox(
             width: _videoController!.value.size.width,
             height: _videoController!.value.size.height,
@@ -591,7 +593,14 @@ class _GameScreenState extends State<GameScreen>
             ),
           ),
           const SizedBox(height: 16),
-          _buildBanner(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 27.0),
+            child: SizedBox(
+              height: 68,
+              width: double.infinity,
+              child: _buildBanner(),
+            ),
+          ),
         ],
       ),
     );
