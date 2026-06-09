@@ -40,13 +40,13 @@ class LocalStorageService {
           {'firstName': 'Luis', 'lastName': 'G.', 'score': 8},
           {'firstName': 'Paola', 'lastName': 'R.', 'score': 5},
         ],
-        'reflex': [
-          {'firstName': 'Diego', 'lastName': 'S.', 'score': 25},
-          {'firstName': 'Andrés', 'lastName': 'C.', 'score': 22},
-          {'firstName': 'Esteban', 'lastName': 'M.', 'score': 20},
-          {'firstName': 'Daniela', 'lastName': 'V.', 'score': 18},
-          {'firstName': 'Juan', 'lastName': 'P.', 'score': 15},
-          {'firstName': 'Maria', 'lastName': 'L.', 'score': 12},
+        'trivia': [
+          {'firstName': 'Diego', 'lastName': 'S.', 'score': 10, 'timeElapsed': 45000},
+          {'firstName': 'Andrés', 'lastName': 'C.', 'score': 9, 'timeElapsed': 40000},
+          {'firstName': 'Esteban', 'lastName': 'M.', 'score': 9, 'timeElapsed': 50000},
+          {'firstName': 'Daniela', 'lastName': 'V.', 'score': 8, 'timeElapsed': 42000},
+          {'firstName': 'Juan', 'lastName': 'P.', 'score': 8, 'timeElapsed': 55000},
+          {'firstName': 'Maria', 'lastName': 'L.', 'score': 7, 'timeElapsed': 60000},
         ],
       };
       await _prefs.setString(_leaderboardKey, jsonEncode(defaultLeaderboard));
@@ -96,6 +96,7 @@ class LocalStorageService {
     required String lastName,
     required int score,
     required String gameType,
+    int? timeElapsed,
   }) async {
     final rawLeaderboard = _prefs.getString(_leaderboardKey);
     if (rawLeaderboard == null) return;
@@ -104,16 +105,26 @@ class LocalStorageService {
       final gameLeaderboard = decoded[gameType] as List;
 
       // Agregar el nuevo record
-      gameLeaderboard.add({
+      final record = {
         'firstName': firstName,
         'lastName': lastName.isNotEmpty ? '${lastName[0]}.' : '',
         'score': score,
-      });
+      };
+      if (timeElapsed != null) {
+        record['timeElapsed'] = timeElapsed;
+      }
+      gameLeaderboard.add(record);
 
       // Ordenar descendente por puntuación
-      gameLeaderboard.sort(
-        (a, b) => (b['score'] as int).compareTo(a['score'] as int),
-      );
+      gameLeaderboard.sort((a, b) {
+        int scoreCompare = (b['score'] as int).compareTo(a['score'] as int);
+        if (scoreCompare != 0) return scoreCompare;
+        
+        if (a['timeElapsed'] != null && b['timeElapsed'] != null) {
+          return (a['timeElapsed'] as int).compareTo(b['timeElapsed'] as int);
+        }
+        return 0;
+      });
 
       // Guardar de vuelta
       decoded[gameType] = gameLeaderboard;

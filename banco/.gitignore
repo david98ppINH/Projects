@@ -37,3 +37,19 @@ flutter_version/ios/Flutter/.last_build_id
 *.log
 *.swp
 *.tmp
+
+# Reports
+reports/
+
+# Firebase cache and logs
+flutter_version/.firebase/
+firebase-debug.log
+ui-debug.log
+
+# Firebase credentials/secrets (in case they are generated locally)
+*firebase*key*.json
+*service-account*.json
+*credentials*.json
+
+# Agents tools and configurations
+.agents/

@@ -150,16 +150,16 @@ class MenuScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20), */
 
-                    // Juego 3: Reflejos de Arco (ACTIVO)
+                    // Juego 3: Trivia Mundialista (ACTIVO)
                     _buildGameCard(
                       context,
-                      title: 'REFLEJOS DE ARCO',
+                      title: 'TRIVIA MUNDIALISTA',
                       description:
-                          'Toca rápidamente los logos del Austro que se iluminan antes de que se agote el tiempo.',
-                      icon: Icons.bolt,
+                          'Demuestra tus conocimientos sobre la Selección respondiendo 10 preguntas lo más rápido posible.',
+                      icon: Icons.quiz,
                       color: BdaColors.navy,
                       isActive: true,
-                      onTap: () => onSelectGame('reflex'),
+                      onTap: () => onSelectGame('trivia'),
                     ),
                   ],
                 ),

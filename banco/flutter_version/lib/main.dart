@@ -1,15 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'theme/bda_theme.dart';
-import 'services/local_storage_service.dart';
-import 'screens/registration_screen.dart';
-import 'screens/menu_screen.dart';
+
+import 'firebase_options.dart';
+import 'models/player_lead.dart';
 import 'screens/game_screen.dart';
 import 'screens/leaderboard_screen.dart';
-import 'models/player_lead.dart';
+import 'screens/menu_screen.dart';
+import 'screens/registration_screen.dart';
+import 'services/local_storage_service.dart';
+import 'theme/bda_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init error: $e');
+  }
 
   // Bloquear orientación en vertical (Portrait)
   await SystemChrome.setPreferredOrientations([
@@ -75,10 +87,25 @@ class KioskFlowNavigator extends StatefulWidget {
 }
 
 class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
-  String _currentScreen =
-      'registration'; // registration, menu, game, leaderboard
+  late String _currentScreen; // registration, menu, game, leaderboard
   PlayerLead? _currentPlayer;
-  String _activeGameType = 'penalty'; // penalty, keepie, reflex
+  String _activeGameType = 'penalty'; // penalty, keepie, trivia
+
+  @override
+  void initState() {
+    super.initState();
+    _currentScreen = 'menu';
+    _currentPlayer = PlayerLead(
+      id: 'temp_kiosk_user',
+      firstName: 'Invitado',
+      lastName: '',
+      email: 'invitado@banco.com',
+      identificacion: '9999999999',
+      score: 0,
+      gameType: 'penalty',
+      timestamp: DateTime.now().toIso8601String(),
+    );
+  }
 
   void _onRegister(PlayerLead player) {
     setState(() {
@@ -94,14 +121,32 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
     });
   }
 
-  void _onGameFinished(int score) async {
+  void _onGameFinished(int score, {int? timeElapsed}) async {
     if (_currentPlayer != null) {
+      // Actualizar en Firebase
+      try {
+        final gameData = <String, dynamic>{'score': score};
+        if (timeElapsed != null) {
+          gameData['timeElapsed'] = timeElapsed;
+        }
+
+        await FirebaseFirestore.instance
+            .collection('jugadores')
+            .doc(_currentPlayer!.id)
+            .set({
+              'puntajes': {_activeGameType: gameData},
+            }, SetOptions(merge: true));
+      } catch (e) {
+        debugPrint('Firebase save error: $e');
+      }
+
       // Registrar puntaje localmente
       await LocalStorageService().registerScore(
         firstName: _currentPlayer!.firstName,
         lastName: _currentPlayer!.lastName,
         score: score,
         gameType: _activeGameType,
+        timeElapsed: timeElapsed,
       );
 
       // Actualizar puntaje del jugador actual para mostrar en el leaderboard
@@ -115,8 +160,17 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
 
   void _onRestartSession() {
     setState(() {
-      _currentPlayer = null;
-      _currentScreen = 'registration';
+      _currentPlayer = PlayerLead(
+        id: 'temp_kiosk_user',
+        firstName: 'Invitado',
+        lastName: '',
+        email: 'invitado@banco.com',
+        identificacion: '9999999999',
+        score: 0,
+        gameType: 'penalty',
+        timestamp: DateTime.now().toIso8601String(),
+      );
+      _currentScreen = 'menu';
     });
   }
 

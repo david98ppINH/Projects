@@ -49,14 +49,22 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     }
   }
 
+  String _formatTime(dynamic timeMs) {
+    if (timeMs == null) return '-';
+    final ms = timeMs as int;
+    final sec = ms ~/ 1000;
+    final fractions = (ms % 1000) ~/ 10;
+    return '$sec.${fractions.toString().padLeft(2, '0')}s';
+  }
+
   String _getGameTitle() {
     switch (widget.gameType) {
       case 'penalty':
         return 'LÍDERES DE PENALES';
       case 'keepie':
         return 'LÍDERES DE DOMINADAS';
-      case 'reflex':
-        return 'LÍDERES DE REFLEJOS';
+      case 'trivia':
+        return 'LÍDERES DE TRIVIA';
       default:
         return 'TABLA DE POSICIONES';
     }
@@ -155,7 +163,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                 ),
                                 color: BdaColors.lightBackground,
                                 child: Row(
-                                  children: const [
+                                  children: [
                                     SizedBox(
                                       width: 50,
                                       child: Text(
@@ -178,6 +186,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                         ),
                                       ),
                                     ),
+                                    if (widget.gameType == 'trivia')
+                                      SizedBox(
+                                        width: 70,
+                                        child: Text(
+                                          'TIEMPO',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            color: BdaColors.navy,
+                                          ),
+                                        ),
+                                      ),
                                     SizedBox(
                                       width: 70,
                                       child: Text(
@@ -267,6 +288,20 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                               ),
                                             ),
                                           ),
+
+                                          if (widget.gameType == 'trivia')
+                                            SizedBox(
+                                              width: 70,
+                                              child: Text(
+                                                _formatTime(record['timeElapsed']),
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: BdaColors.navy,
+                                                ),
+                                              ),
+                                            ),
 
                                           // Record
                                           SizedBox(

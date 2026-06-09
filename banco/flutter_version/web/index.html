@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,24 +19,22 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
+  <meta name="description" content="Juegos Mundialistas">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="flutter_version">
+  <meta name="apple-mobile-web-app-title" content="Juegos Mundialistas">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>flutter_version</title>
+  <title>Juegos Mundialistas</title>
   <link rel="manifest" href="manifest.json">
 
   <!-- HubSpot Forms Embed JS -->
   <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/embed/v2.js"></script>
   <script>
-    window.initHubspotForm = function(targetId) {
+    window.initHubspotForm = function (targetId) {
       // Intentar limpiar primero el contenedor si tuviera elementos anteriores
       var container = document.getElementById(targetId);
       if (container) {
@@ -52,11 +51,9 @@
       }
     };
 
-    window.addEventListener('message', function(event) {
+    window.addEventListener('message', function (event) {
       if (event.data.type === 'hsFormCallback' && event.data.eventName === 'onFormSubmitted') {
         const submissionData = event.data.data;
-        console.log("HubSpot Form Submitted. Fields data:", JSON.stringify(submissionData));
-        
         let email = "";
         let firstName = "";
         let lastName = "";
@@ -64,10 +61,10 @@
 
         if (submissionData) {
           if (Array.isArray(submissionData)) {
-            submissionData.forEach(function(field) {
+            submissionData.forEach(function (field) {
               var name = (field.name || '').toLowerCase();
               var val = field.value || '';
-              
+
               if (name === 'email' || name === 'correo' || name === 'mail') {
                 email = val;
               } else if (name === 'firstname' || name === 'first_name' || name === 'nombre' || name === 'nombres' || name === 'name') {
@@ -101,6 +98,7 @@
     });
   </script>
 </head>
+
 <body>
   <!--
     You can customize the "flutter_bootstrap.js" script.
@@ -112,4 +110,5 @@
   -->
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

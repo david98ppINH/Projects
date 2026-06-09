@@ -1,13 +1,8 @@
-import 'dart:convert';
-import 'dart:html' as html;
-import 'dart:js' as js;
-import 'dart:ui_web' as ui_web;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import '../models/player_lead.dart';
 import '../services/local_storage_service.dart';
 import '../theme/bda_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final Function(PlayerLead) onRegister;
@@ -19,169 +14,59 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  bool _isLoading = false;
 
-  WebViewController? _webViewController;
+  void _submitForm() async {
+    if (_isLoading) return;
 
-  @override
-  void initState() {
-    super.initState();
-    if (kIsWeb) {
-      // Registrar la vista HTML para HubSpot
-      ui_web.platformViewRegistry.registerViewFactory(
-        'hubspot-form-view',
-        (int viewId) {
-          final element = html.DivElement()
-            ..id = 'hubspot-form-container'
-            ..style.width = '100%'
-            ..style.height = '100%'
-            ..style.overflowY = 'auto';
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
 
-          // Inicializar el formulario con un leve delay tras montarse el elemento
-          Future.delayed(const Duration(milliseconds: 150), () {
-            js.context.callMethod('initHubspotForm', ['hubspot-form-container']);
-          });
+      String docId = 'lead_${DateTime.now().millisecondsSinceEpoch}';
+      
+      try {
+        final docRef = await FirebaseFirestore.instance.collection('jugadores').add({
+          'nombre': _nameController.text.trim(),
+          'correo': _emailController.text.trim(),
+          'fechaRegistro': FieldValue.serverTimestamp(),
+        });
+        docId = docRef.id;
+      } catch (e) {
+        debugPrint('Firebase save error: $e');
+      }
 
-          return element;
-        },
+      final lead = PlayerLead(
+        id: docId,
+        firstName: _nameController.text.trim(),
+        lastName: '',
+        email: _emailController.text.trim(),
+        identificacion: '0000000000',
+        score: 0,
+        gameType: '',
+        timestamp: DateTime.now().toIso8601String(),
       );
 
-      // Listener global de JavaScript para recibir el lead desde HubSpot
-      js.context['onHubspotSubmitted'] = (String jsonStr) {
-        final data = jsonDecode(jsonStr);
-        final lead = PlayerLead(
-          id: 'lead_${DateTime.now().millisecondsSinceEpoch}',
-          firstName: data['firstName'] ?? 'Jugador',
-          lastName: data['lastName'] ?? '',
-          email: data['email'] ?? '',
-          identificacion: data['identificacion'] ?? '0000000000',
-          score: 0,
-          gameType: '',
-          timestamp: DateTime.now().toIso8601String(),
-        );
-
-        LocalStorageService().saveLead(lead).then((_) {
-          if (mounted) {
-            widget.onRegister(lead);
-          }
-        });
-      };
-    } else {
-      // Configuración de WebView para Android/iOS
-      _webViewController = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onNavigationRequest: (NavigationRequest request) {
-              // Prevenir redirecciones externas (ej. a la web del banco) para no salirse del quiosco
-              if (!request.url.startsWith('about:blank') && !request.url.startsWith('data:')) {
-                return NavigationDecision.prevent;
-              }
-              return NavigationDecision.navigate;
-            },
-          ),
-        )
-        ..addJavaScriptChannel(
-          'HubspotChannel',
-          onMessageReceived: (JavaScriptMessage message) {
-            final data = jsonDecode(message.message);
-            final lead = PlayerLead(
-              id: 'lead_${DateTime.now().millisecondsSinceEpoch}',
-              firstName: data['firstName'] ?? 'Jugador',
-              lastName: data['lastName'] ?? '',
-              email: data['email'] ?? '',
-              identificacion: data['identificacion'] ?? '0000000000',
-              score: 0,
-              gameType: '',
-              timestamp: DateTime.now().toIso8601String(),
-            );
-
-            LocalStorageService().saveLead(lead).then((_) {
-              if (mounted) {
-                widget.onRegister(lead);
-              }
-            });
-          },
-        )
-        ..loadHtmlString('''
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/embed/v2.js"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 10px;
-      background-color: white;
-      font-family: sans-serif;
-    }
-  </style>
-</head>
-<body>
-  <div id="hubspot-form-container"></div>
-  <script>
-    if (window.hbspt) {
-      window.hbspt.forms.create({
-        portalId: "41516556",
-        formId: "ad6aa7df-8392-4808-8864-e905be4582d3",
-        region: "na1",
-        target: '#hubspot-form-container',
-        inlineMessage: "Gracias por registrarte."
+      LocalStorageService().saveLead(lead).then((_) {
+        if (mounted) {
+          widget.onRegister(lead);
+          setState(() {
+            _isLoading = false;
+          });
+        }
       });
     }
+  }
 
-    window.addEventListener('message', function(event) {
-      if (event.data.type === 'hsFormCallback' && event.data.eventName === 'onFormSubmitted') {
-        const submissionData = event.data.data;
-        let email = "";
-        let firstName = "";
-        let lastName = "";
-        let identificacion = "";
-
-        if (submissionData) {
-          if (Array.isArray(submissionData)) {
-            submissionData.forEach(function(field) {
-              var name = (field.name || '').toLowerCase();
-              var val = field.value || '';
-              
-              if (name === 'email' || name === 'correo' || name === 'mail') {
-                email = val;
-              } else if (name === 'firstname' || name === 'first_name' || name === 'nombre' || name === 'nombres' || name === 'name') {
-                firstName = val;
-              } else if (name === 'lastname' || name === 'last_name' || name === 'apellido' || name === 'apellidos') {
-                lastName = val;
-              } else if (name === 'cedula' || name === 'identificacion' || name === 'num_cedula' || name === 'identificación' || name === 'documento' || name === 'id') {
-                identificacion = val;
-              }
-            });
-          } else {
-            const vals = submissionData.submissionValues || submissionData;
-            if (vals && typeof vals === 'object') {
-              email = vals.email || vals.correo || vals.mail || email;
-              firstName = vals.firstname || vals.first_name || vals.firstName || vals.nombre || vals.nombres || vals.name || firstName;
-              lastName = vals.lastname || vals.last_name || vals.lastName || vals.apellido || vals.apellidos || lastName;
-              identificacion = vals.identificacion || vals.cedula || vals.num_cedula || vals.identificación || vals.documento || vals.id || identificacion;
-            }
-          }
-        }
-
-        const leadData = JSON.stringify({
-          firstName: firstName || 'Jugador',
-          lastName: lastName || '',
-          email: email || '',
-          identificacion: identificacion || '0000000000'
-        });
-
-        if (window.HubspotChannel) {
-          window.HubspotChannel.postMessage(leadData);
-        }
-      }
-    });
-  </script>
-</body>
-</html>
-''');
-    }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
   }
 
   @override
@@ -196,7 +81,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
       child: Stack(
         children: [
-          // Fondo decorativo con siluetas deportivas abstractas o líneas
+          // Fondo decorativo
           Positioned(
             top: -100,
             right: -100,
@@ -242,8 +127,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ],
                   ),
                   child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
+                    text: const TextSpan(
+                      style: TextStyle(
                         fontFamily: 'Assistant',
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
@@ -276,7 +161,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
                 
-                // Formulario posicionado ergonómicamente en la mitad/inferior del canvas
+                // Formulario
                 Expanded(
                   child: Center(
                     child: SingleChildScrollView(
@@ -298,21 +183,108 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             ),
                           ],
                         ),
-                        child: kIsWeb
-                            ? const SizedBox(
-                                width: double.infinity,
-                                height: 460,
-                                child: HtmlElementView(
-                                  viewType: 'hubspot-form-view',
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextFormField(
+                                controller: _nameController,
+                                decoration: InputDecoration(
+                                  labelText: 'Nombre',
+                                  labelStyle: const TextStyle(color: BdaColors.navy),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: BdaColors.navy, width: 2),
+                                  ),
+                                  prefixIcon: const Icon(Icons.person, color: BdaColors.navy),
                                 ),
-                              )
-                            : SizedBox(
-                                width: double.infinity,
-                                height: 460,
-                                child: WebViewWidget(
-                                  controller: _webViewController!,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Por favor ingresa tu nombre';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 20),
+                              TextFormField(
+                                controller: _emailController,
+                                decoration: InputDecoration(
+                                  labelText: 'Correo Electrónico',
+                                  labelStyle: const TextStyle(color: BdaColors.navy),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: BdaColors.navy, width: 2),
+                                  ),
+                                  prefixIcon: const Icon(Icons.email, color: BdaColors.navy),
+                                ),
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Por favor ingresa tu correo';
+                                  }
+                                  if (!RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                                    return 'Ingresa un correo válido';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 32),
+                              SizedBox(
+                                height: 54,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _submitForm,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: BdaColors.navy,
+                                    disabledBackgroundColor: BdaColors.navy.withOpacity(0.7),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: _isLoading ? 0 : 5,
+                                  ),
+                                  child: _isLoading
+                                      ? Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: const [
+                                            SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 3,
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Text(
+                                              'CARGANDO...',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : const Text(
+                                          'JUGAR AHORA',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                 ),
                               ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
