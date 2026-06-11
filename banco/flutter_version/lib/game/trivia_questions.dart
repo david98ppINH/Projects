@@ -101,7 +101,7 @@ final List<Map<String, dynamic>> triviaQuestionsJson = [
     "extra": null
   },
   {
-    "pregunta": "¿Cuántos equipos compiten en la fase final de la Copa Mundial de la FIFA a partir de esta edición?",
+    "pregunta": "¿Cuántos equipos compiten en esta edición de la Copa Mundial de la FIFA?",
     "correcta": "48 equipos",
     "incorrectas": ["36 equipos", "40 equipos", "64 equipos"],
     "extra": "expandido desde los 32 de la edición anterior"
