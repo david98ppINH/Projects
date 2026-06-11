@@ -93,17 +93,24 @@ class PenaltyGame extends FlameGame {
   double goalieTargetY = logicalHeight * 0.35;
 
   // ==========================================
-  // CONFIGURACIÓN DE DIFICULTAD (Ajustable)
+  // CONFIGURACIÓN DE DIFICULTAD Y FÍSICAS (Ajustado)
   // ==========================================
-  // Agilidad del arquero: menor = más lento (más fácil), mayor = más rápido. Original era 0.09.
-  static const double configGoalieAgility = 0.075;
+  // Agilidad del arquero: menor = más lento, mayor = más rápido.
+  static const double configGoalieAgility = 0.15;
 
-  // Multiplicador de radio de atajada: menor = requiere más precisión del arquero para atajar. Original era 1.5.
+  // Multiplicador de radio de atajada: menor = requiere más precisión del arquero para atajar.
   static const double configGoalieSaveRadiusMultiplier = 1.15;
 
   // Error de predicción en píxeles: a mayor error, el arquero se tira más desviado de la trayectoria real.
-  static const double configGoaliePredictionErrorX = 40.0;
-  static const double configGoaliePredictionErrorY = 25.0;
+  static const double configGoaliePredictionErrorX = 60.0;
+  static const double configGoaliePredictionErrorY = 35.0;
+
+  // Constantes físicas independientes de FPS
+  static const double _physicsReferenceFps = 60.0;
+  static const double _baseBallDepthVelocity = 0.052 * _physicsReferenceFps; // En unidades Z por segundo
+  static const double _minShotSpeedFactor = 0.8;
+  static const double _maxShotSpeedFactor = 2.0;
+  static const double _ballGravity = 0.30 * _physicsReferenceFps * _physicsReferenceFps; // En px/seg²
 
   @override
   Color backgroundColor() => Colors.transparent;
@@ -130,6 +137,7 @@ class PenaltyGame extends FlameGame {
   ui.Image? goalSprite;
   ui.Image? pitchSprite;
   ui.Image? goalieSprite;
+  ui.Picture? _staticStadiumPicture;
 
   // Callbacks para comunicar con la interfaz Flutter
   final Function(int score, int attempts) onProgressUpdate;
@@ -218,19 +226,20 @@ class PenaltyGame extends FlameGame {
       final double swipeSpeed = vector.distance / elapsedSeconds;
 
       // Escalar factor de velocidad (velocidad base de referencia: ~1200 px/seg)
-      final double speedFactor = (swipeSpeed / 1200.0).clamp(0.5, 2.2);
+      final double speedFactor = (swipeSpeed / 1200.0).clamp(
+        _minShotSpeedFactor,
+        _maxShotSpeedFactor,
+      );
 
-      // Calcular físicas de trayectoria 2.5D dinámicas basadas en la velocidad del arrastre
-      final double baseVz = 0.038;
-      ballVz = baseVz * speedFactor; // Velocidad de alejamiento dinámica
-
-      final double N = 1.0 / ballVz;
+      // Calcular físicas 2.5D en segundos para que el tiro no dependa del FPS.
+      ballVz = _baseBallDepthVelocity * speedFactor;
+      final double flightDuration = 1.0 / ballVz;
       final double gravityCompensation =
-          0.30 * N * (N + 1) / 2; // Gravedad proporcional al tiempo de vuelo
+          0.5 * _ballGravity * flightDuration * flightDuration;
 
       // Mapear el tiro para que la bola llegue exactamente al punto de liberación (end.dx, end.dy)
-      ballVx = vector.dx / N;
-      ballVy = (vector.dy - gravityCompensation) / N;
+      ballVx = vector.dx / flightDuration;
+      ballVy = (vector.dy - gravityCompensation) / flightDuration;
       isKicked = true;
 
       // Simulación de predicción imperfecta del portero con error configurable
@@ -266,18 +275,37 @@ class PenaltyGame extends FlameGame {
     }
 
     if (isKicked) {
+      final double stepDt = dt.clamp(0.0, 0.3).toDouble();
+      final double previousBallX = ballX;
+      final double previousBallY = ballY;
+      final double previousBallZ = ballZ;
+
       // Actualizar física del balón (2.5D)
-      ballX += ballVx;
-      ballY += ballVy;
-      ballZ += ballVz;
-      ballVy += 0.30; // Gravedad artificial
+      ballX += ballVx * stepDt;
+      ballY += ballVy * stepDt + 0.5 * _ballGravity * stepDt * stepDt;
+      ballZ += ballVz * stepDt;
+      ballVy += _ballGravity * stepDt;
 
       // Movimiento del arquero utilizando la agilidad configurada
-      goalieX = goalieX + (goalieTargetX - goalieX) * configGoalieAgility;
-      goalieY = goalieY + (goalieTargetY - goalieY) * configGoalieAgility;
+      final double goalieStep =
+          (1 - pow(1 - configGoalieAgility, stepDt * _physicsReferenceFps))
+              .toDouble();
+      goalieX = goalieX + (goalieTargetX - goalieX) * goalieStep;
+      goalieY = goalieY + (goalieTargetY - goalieY) * goalieStep;
 
       // Evaluar gol o atajada cuando el balón pasa la meta en Z = 1.0
       if (ballZ >= 1.0) {
+        final double zDelta = ballZ - previousBallZ;
+        if (zDelta > 0) {
+          final double hitProgress = ((1.0 - previousBallZ) / zDelta).clamp(
+            0.0,
+            1.0,
+          );
+          ballX = previousBallX + (ballX - previousBallX) * hitProgress;
+          ballY = previousBallY + (ballY - previousBallY) * hitProgress;
+          ballZ = 1.0;
+        }
+
         isKicked = false;
         evaluateShot();
       }
@@ -323,7 +351,7 @@ class PenaltyGame extends FlameGame {
     onProgressUpdate(score, attempts);
 
     // Esperar un momento y reiniciar o terminar
-    Future.delayed(const Duration(milliseconds: 1400), () {
+    Future.delayed(const Duration(milliseconds: 1200), () {
       if (attempts >= maxAttempts) {
         onGameOver(score);
       } else {
@@ -392,6 +420,26 @@ class PenaltyGame extends FlameGame {
   }
 
   void drawStadium(Canvas canvas) {
+    if (crowdState != 'celebrating') {
+      _staticStadiumPicture ??= _buildStaticStadiumPicture();
+      canvas.drawPicture(_staticStadiumPicture!);
+      return;
+    }
+
+    _drawStadium(canvas, animateCrowd: true);
+  }
+
+  ui.Picture _buildStaticStadiumPicture() {
+    final recorder = ui.PictureRecorder();
+    final pictureCanvas = Canvas(
+      recorder,
+      const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight),
+    );
+    _drawStadium(pictureCanvas, animateCrowd: false);
+    return recorder.endRecording();
+  }
+
+  void _drawStadium(Canvas canvas, {required bool animateCrowd}) {
     // Fondo grisáceo
     final bgPaint = Paint()..color = const Color(0xFFF0F2F5);
     canvas.drawRect(
@@ -411,8 +459,8 @@ class PenaltyGame extends FlameGame {
       ..color = const Color(0xFFCBD5E1)
       ..strokeWidth = 2;
 
-    final double tick = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    final bool isCelebrating = (crowdState == 'celebrating');
+    final double tick = animateCrowd ? DateTime.now().millisecondsSinceEpoch / 1000.0 : 0.0;
+    final bool isCelebrating = animateCrowd && (crowdState == 'celebrating');
 
     for (double y = 40.0; y < logicalHeight * 0.4; y += 30.0) {
       canvas.drawLine(Offset(0, y), Offset(logicalWidth, y), seatLinePaint);
@@ -435,9 +483,9 @@ class PenaltyGame extends FlameGame {
             bounceY = -12.0 * (sin(tick * 15.0 + phase).abs());
             raiseArms = true;
           } else {
-            // Balanceo/respiración pasiva muy sutil
-            bounceY = -2.0 * (sin(tick * 2.5 + phase).abs());
-            swayX = sin(tick * 1.5 + phase) * 2.0;
+            // Estático
+            bounceY = 0.0;
+            swayX = 0.0;
           }
 
           // Posición alineada del espectador (evita distorsión de partes desfasadas)
