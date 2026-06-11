@@ -41,12 +41,12 @@ class LocalStorageService {
           {'firstName': 'Paola', 'lastName': 'R.', 'score': 5},
         ],
         'trivia': [
-          {'firstName': 'Diego', 'lastName': 'S.', 'score': 10, 'timeElapsed': 45000},
-          {'firstName': 'Andrés', 'lastName': 'C.', 'score': 9, 'timeElapsed': 40000},
-          {'firstName': 'Esteban', 'lastName': 'M.', 'score': 9, 'timeElapsed': 50000},
-          {'firstName': 'Daniela', 'lastName': 'V.', 'score': 8, 'timeElapsed': 42000},
-          {'firstName': 'Juan', 'lastName': 'P.', 'score': 8, 'timeElapsed': 55000},
-          {'firstName': 'Maria', 'lastName': 'L.', 'score': 7, 'timeElapsed': 60000},
+          {'firstName': 'Diego', 'lastName': 'S.', 'score': 5, 'timeElapsed': 22000},
+          {'firstName': 'Andrés', 'lastName': 'C.', 'score': 5, 'timeElapsed': 25000},
+          {'firstName': 'Esteban', 'lastName': 'M.', 'score': 4, 'timeElapsed': 20000},
+          {'firstName': 'Daniela', 'lastName': 'V.', 'score': 4, 'timeElapsed': 23000},
+          {'firstName': 'Juan', 'lastName': 'P.', 'score': 3, 'timeElapsed': 24000},
+          {'firstName': 'Maria', 'lastName': 'L.', 'score': 3, 'timeElapsed': 28000},
         ],
       };
       await _prefs.setString(_leaderboardKey, jsonEncode(defaultLeaderboard));
