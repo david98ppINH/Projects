@@ -61,6 +61,7 @@ class KioskScaleWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor:
           Colors.black, // Fondo negro para márgenes (si la pantalla no es 9:16)
       body: Center(
