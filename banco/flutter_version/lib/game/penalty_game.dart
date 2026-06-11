@@ -927,13 +927,8 @@ class PenaltyGame extends FlameGame {
   }
 
   void _drawCanvasBillboard(Canvas canvas, Rect rect) {
-    // 1. Fondo de valla con gradiente Navy elegante de Banco del Austro
-    final bgPaint = Paint()
-      ..shader = ui.Gradient.linear(
-        rect.topLeft,
-        rect.bottomRight,
-        [const Color(0xFF00205B), const Color(0xFF001030)],
-      );
+    // 1. Fondo de valla blanco
+    final bgPaint = Paint()..color = Colors.white;
     canvas.drawRect(rect, bgPaint);
 
     // 2. Dibujar franjas decorativas sutiles en los extremos
@@ -969,7 +964,7 @@ class PenaltyGame extends FlameGame {
         text: const TextSpan(
           text: 'BANCO DEL AUSTRO',
           style: TextStyle(
-            color: Colors.white,
+            color: Color(0xFF00205B), // Navy para contraste en fondo blanco
             fontSize: 15,
             fontWeight: FontWeight.w900,
             letterSpacing: 4.5,
@@ -995,9 +990,9 @@ class PenaltyGame extends FlameGame {
         Offset(rect.left + sheenPosition + 120, rect.top),
         [
           Colors.transparent,
-          const Color(0xFFFFB81C).withValues(alpha: 0.15), // Oro suave
-          const Color(0xFFFFFFFF).withValues(alpha: 0.35), // Blanco de brillo
-          const Color(0xFFFFB81C).withValues(alpha: 0.15),
+          const Color(0xFFCBD5E1).withValues(alpha: 0.15), // Plateado suave
+          const Color(0xFFFFFFFF).withValues(alpha: 0.65), // Brillo blanco
+          const Color(0xFFCBD5E1).withValues(alpha: 0.15),
           Colors.transparent,
         ],
         [0.0, 0.35, 0.5, 0.65, 1.0],
