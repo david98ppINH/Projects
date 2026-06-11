@@ -35,22 +35,45 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   void _onFocusChange() {
     final hasFocus = _nameFocusNode.hasFocus || _emailFocusNode.hasFocus;
-    setState(() {
-      _isKeyboardVisible = hasFocus;
-    });
-
-    if (_emailFocusNode.hasFocus) {
-      // Auto-scroll para que el campo de correo sea visible por encima del teclado
-      Future.delayed(const Duration(milliseconds: 320), () {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOut,
-          );
-        }
+    if (_isKeyboardVisible != hasFocus) {
+      setState(() {
+        _isKeyboardVisible = hasFocus;
       });
     }
+
+    if (_emailFocusNode.hasFocus) _scheduleEmailScroll();
+  }
+
+  void _scheduleEmailScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToFormBottom();
+    });
+    Future<void>.delayed(
+      const Duration(milliseconds: 260),
+      _scrollToFormBottom,
+    );
+    Future<void>.delayed(
+      const Duration(milliseconds: 520),
+      _scrollToFormBottom,
+    );
+  }
+
+  Future<void> _scrollToFormBottom() async {
+    if (!mounted ||
+        !_emailFocusNode.hasFocus ||
+        !_scrollController.hasClients) {
+      return;
+    }
+
+    final position = _scrollController.position;
+    final target = position.maxScrollExtent;
+    if (target <= position.minScrollExtent) return;
+
+    await _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
+    );
   }
 
   void _submitForm() async {
@@ -159,7 +182,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       color: BdaColors.sipyHeaderBackground,
                       border: Border(
                         bottom: BorderSide(
-                          color: BdaColors.sipyInputBorder.withValues(alpha: 0.3),
+                          color: BdaColors.sipyInputBorder.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       boxShadow: [
@@ -209,12 +234,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       child: SingleChildScrollView(
                         controller: _scrollController,
                         physics: const ClampingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                              padding: const EdgeInsets.fromLTRB(42, 46, 42, 62),
+                              padding: const EdgeInsets.fromLTRB(
+                                42,
+                                46,
+                                42,
+                                62,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
@@ -238,7 +271,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               child: Form(
                                 key: _formKey,
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     _buildFieldLabel('NOMBRE'),
@@ -249,7 +283,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       hintText: 'Nombre',
                                       icon: Icons.person_outline,
                                       validator: (value) {
-                                        if (value == null || value.trim().isEmpty) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
                                           return 'Por favor ingresa tu nombre';
                                         }
                                         return null;
@@ -264,8 +299,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       hintText: 'Correo Electrónico',
                                       icon: Icons.mail_outline,
                                       keyboardType: TextInputType.emailAddress,
+                                      onTap: _scheduleEmailScroll,
                                       validator: (value) {
-                                        if (value == null || value.trim().isEmpty) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
                                           return 'Por favor ingresa tu correo';
                                         }
                                         if (!RegExp(
@@ -280,16 +317,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     SizedBox(
                                       height: 70,
                                       child: ElevatedButton(
-                                        onPressed: _isLoading ? null : _submitForm,
+                                        onPressed: _isLoading
+                                            ? null
+                                            : _submitForm,
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: BdaColors.sipyGreen,
-                                          disabledBackgroundColor: BdaColors.sipyGreen
+                                          disabledBackgroundColor: BdaColors
+                                              .sipyGreen
                                               .withValues(alpha: 0.65),
                                           foregroundColor: BdaColors.sipyBlue,
                                           elevation: 0,
                                           shadowColor: Colors.transparent,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(35),
+                                            borderRadius: BorderRadius.circular(
+                                              35,
+                                            ),
                                           ),
                                         ),
                                         child: _isLoading
@@ -300,18 +342,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                                   SizedBox(
                                                     width: 24,
                                                     height: 24,
-                                                    child: CircularProgressIndicator(
-                                                      color: BdaColors.sipyBlue,
-                                                      strokeWidth: 3,
-                                                    ),
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          color: BdaColors
+                                                              .sipyBlue,
+                                                          strokeWidth: 3,
+                                                        ),
                                                   ),
                                                   SizedBox(width: 12),
                                                   Text(
                                                     'CARGANDO...',
                                                     style: TextStyle(
-                                                      fontFamily: BdaFonts.gotham,
+                                                      fontFamily:
+                                                          BdaFonts.gotham,
                                                       fontSize: 24,
-                                                      fontWeight: FontWeight.w800,
+                                                      fontWeight:
+                                                          FontWeight.w800,
                                                       color: BdaColors.sipyBlue,
                                                       letterSpacing: -1.2,
                                                     ),
@@ -325,9 +371,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                                   Text(
                                                     'JUGAR',
                                                     style: TextStyle(
-                                                      fontFamily: BdaFonts.gotham,
+                                                      fontFamily:
+                                                          BdaFonts.gotham,
                                                       fontSize: 28,
-                                                      fontWeight: FontWeight.w900,
+                                                      fontWeight:
+                                                          FontWeight.w900,
                                                       color: BdaColors.sipyBlue,
                                                       letterSpacing: -1.6,
                                                     ),
@@ -336,9 +384,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                                   Text(
                                                     'AHORA',
                                                     style: TextStyle(
-                                                      fontFamily: BdaFonts.gotham,
+                                                      fontFamily:
+                                                          BdaFonts.gotham,
                                                       fontSize: 28,
-                                                      fontWeight: FontWeight.w900,
+                                                      fontWeight:
+                                                          FontWeight.w900,
                                                       color: BdaColors.sipyBlue,
                                                       letterSpacing: -1.6,
                                                     ),
@@ -394,11 +444,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     required String? Function(String?) validator,
     TextInputType? keyboardType,
     FocusNode? focusNode,
+    VoidCallback? onTap,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       focusNode: focusNode,
+      onTap: onTap,
       style: const TextStyle(
         fontFamily: BdaFonts.gotham,
         color: BdaColors.sipyBodyText,
