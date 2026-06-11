@@ -131,6 +131,7 @@ class PenaltyGame extends FlameGame {
   ui.Image? goalSprite;
   ui.Image? pitchSprite;
   ui.Image? goalieSprite;
+  ui.Image? sippyLogoSprite;
   ui.Picture? _staticStadiumPicture;
   List<ui.Picture>? _celebrationPictures;
   static const int _numCelebrationFrames = 8;
@@ -157,6 +158,7 @@ class PenaltyGame extends FlameGame {
       goalSprite = await images.load('arco.webp');
       pitchSprite = await images.load('chancha.webp');
       goalieSprite = await images.load('Jugador.webp');
+      sippyLogoSprite = await images.load('sippy.png');
     } catch (e) {
       debugPrint('Error cargando sprites: $e');
     }
@@ -945,8 +947,45 @@ class PenaltyGame extends FlameGame {
       stripePaint,
     );
 
-    // 3. Brillo metálico animado (Sheen Effect)
-    // El brillo se desplaza de izquierda a derecha de forma periódica
+    // Guardar capa para recortar brillo y logo dentro de la valla
+    canvas.save();
+    canvas.clipRect(rect);
+
+    // 3. Dibujar el logo de Sippy en el centro si está cargado
+    if (sippyLogoSprite != null) {
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromCenter(
+          center: rect.center,
+          width: rect.width * 0.35,
+          height: rect.height * 0.75,
+        ),
+        image: sippyLogoSprite!,
+        fit: BoxFit.contain,
+      );
+    } else {
+      // Fallback a texto si por alguna razón no se carga el logo
+      final textPainter = TextPainter(
+        text: const TextSpan(
+          text: 'BANCO DEL AUSTRO',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 4.5,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      final textOffset = Offset(
+        rect.left + (rect.width - textPainter.width) / 2,
+        rect.top + (rect.height - textPainter.height) / 2,
+      );
+      textPainter.paint(canvas, textOffset);
+    }
+
+    // 4. Brillo metálico animado (Sheen Effect) sobre el fondo y el logo
     final double time = DateTime.now().millisecondsSinceEpoch / 1000.0;
     final double sheenPosition = (time * 150.0) % (rect.width * 2) - rect.width;
 
@@ -963,47 +1002,14 @@ class PenaltyGame extends FlameGame {
         ],
         [0.0, 0.35, 0.5, 0.65, 1.0],
       );
-    
-    // Guardar capa para recortar el brillo dentro de la valla
-    canvas.save();
-    canvas.clipRect(rect);
     canvas.drawRect(rect, sheenPaint);
     canvas.restore();
 
-    // 4. Borde Dorado
+    // 5. Borde Dorado
     final borderPaint = Paint()
       ..color = const Color(0xFFFFB81C) // Oro
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
     canvas.drawRect(rect, borderPaint);
-
-    // 5. Texto de Marca: BANCO DEL AUSTRO
-    final textPainter = TextPainter(
-      text: const TextSpan(
-        text: 'BANCO DEL AUSTRO',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 15,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 4.5,
-          shadows: [
-            Shadow(
-              color: Colors.black45,
-              offset: Offset(1.5, 1.5),
-              blurRadius: 2.0,
-            ),
-          ],
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    
-    // Centrar texto en la valla
-    final textOffset = Offset(
-      rect.left + (rect.width - textPainter.width) / 2,
-      rect.top + (rect.height - textPainter.height) / 2,
-    );
-    textPainter.paint(canvas, textOffset);
   }
 }
