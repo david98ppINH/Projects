@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "bda-games-fan-fest"
-  }
+  },
+  "targets": {
+    "bda-games-fan-fest": {
+      "hosting": {
+        "dev_test": [
+          "bda-games-fan-fest-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

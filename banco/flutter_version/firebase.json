@@ -12,6 +12,7 @@
     }
   },
   "hosting": {
+    "target": "dev_test",
     "public": "build/web",
     "ignore": [
       "firebase.json",
