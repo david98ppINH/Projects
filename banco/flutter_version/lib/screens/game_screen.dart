@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import '../models/player_lead.dart';
 import '../theme/bda_theme.dart';
 import '../game/penalty_game.dart';
@@ -32,8 +31,6 @@ class _GameScreenState extends State<GameScreen>
 
   // Específico de Penales
   int _attempts = 0;
-  VideoPlayerController? _videoController;
-  bool _isVideoInitialized = false;
 
   // Específico de Trivia
   List<TriviaQuestion> _triviaQuestions = [];
@@ -67,9 +64,6 @@ class _GameScreenState extends State<GameScreen>
       parent: _messageAnimationController,
       curve: Curves.elasticOut,
     );
-
-    // Inicializar el video publicitario para ambos modos de juego
-    _initPenaltyVideo();
 
     // Inicializar el juego correspondiente
     if (widget.gameType == 'trivia') {
@@ -127,43 +121,7 @@ class _GameScreenState extends State<GameScreen>
     _currentOptions.shuffle(Random());
   }
 
-  void _initPenaltyVideo() {
-    _videoController = VideoPlayerController.asset('assets/animacion.mp4')
-      ..addListener(_keepPenaltyVideoPlaying)
-      ..initialize().then((_) async {
-        final controller = _videoController;
-        if (controller == null) return;
 
-        await controller.setLooping(true);
-        await controller.setVolume(0.0); // Mudo para permitir autoplay en web
-        await controller.play();
-
-        _safeSetState(() {
-          _isVideoInitialized = true;
-        });
-      });
-  }
-
-  void _keepPenaltyVideoPlaying() {
-    final controller = _videoController;
-    if (!mounted || controller == null || !controller.value.isInitialized) {
-      return;
-    }
-    if (controller.value.hasError) return;
-
-    final duration = controller.value.duration;
-    final position = controller.value.position;
-    if (duration > Duration.zero &&
-        position >= duration - const Duration(milliseconds: 120)) {
-      controller.seekTo(Duration.zero);
-      controller.play();
-      return;
-    }
-
-    if (!controller.value.isPlaying) {
-      controller.play();
-    }
-  }
 
   void _onTriviaAnswerSelected(String selected) {
     if (_isAnswerSelected) return;
@@ -228,8 +186,6 @@ class _GameScreenState extends State<GameScreen>
     _triviaTimer?.cancel();
     _triviaStopwatch.stop();
     _messageAnimationController.dispose();
-    _videoController?.removeListener(_keepPenaltyVideoPlaying);
-    _videoController?.dispose();
     super.dispose();
   }
 
@@ -241,12 +197,7 @@ class _GameScreenState extends State<GameScreen>
       color: BdaColors.navy,
       child: Stack(
         children: [
-          // Fondo o Video según el juego
-          if (!isTrivia && _game != null)
-            Positioned.fromRect(
-              rect: _penaltyGame.billboardRect,
-              child: _buildBanner(),
-            ),
+          // (El banner publicitario se dibuja directamente en el Canvas de PenaltyGame)
 
           // Motor de Juego Flame o Interfaz de Trivia
           if (!isTrivia && _game != null)
@@ -319,22 +270,7 @@ class _GameScreenState extends State<GameScreen>
     );
   }
 
-  Widget _buildBanner() {
-    if (_isVideoInitialized && _videoController != null) {
-      return ClipRect(
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: SizedBox(
-            width: _videoController!.value.size.width,
-            height: _videoController!.value.size.height,
-            child: VideoPlayer(_videoController!),
-          ),
-        ),
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
-  }
+
 
   List<Widget> _buildPenaltyHud() {
     return [

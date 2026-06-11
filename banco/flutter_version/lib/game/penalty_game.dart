@@ -18,12 +18,7 @@ class PenaltyGame extends FlameGame {
   static const double _goalSpriteSourceTop = 106.0;
   static const double _goalSpriteSourceRight = 1868.0;
   static const double _goalSpriteSourceBottom = 984.0;
-  static final Rect _goalSpriteSourceRect = Rect.fromLTRB(
-    _goalSpriteSourceLeft,
-    _goalSpriteSourceTop,
-    _goalSpriteSourceRight,
-    _goalSpriteSourceBottom,
-  );
+
   static const double _goalSpriteSourceWidth =
       _goalSpriteSourceRight - _goalSpriteSourceLeft;
   static const double _goalSpriteSourceHeight =
@@ -95,15 +90,21 @@ class PenaltyGame extends FlameGame {
   // ==========================================
   // CONFIGURACIÓN DE DIFICULTAD (Ajustable)
   // ==========================================
-  // Agilidad del arquero: menor = más lento (más fácil), mayor = más rápido. Original era 0.09.
-  static const double configGoalieAgility = 0.075;
+  // Agilidad del arquero: menor = más lento (más fácil), mayor = más rápido. Original era 0.075.
+  static const double configGoalieAgility = 0.07;
 
-  // Multiplicador de radio de atajada: menor = requiere más precisión del arquero para atajar. Original era 1.5.
-  static const double configGoalieSaveRadiusMultiplier = 1.15;
+  // Multiplicador de radio de atajada: menor = requiere más precisión del arquero para atajar. Original era 1.15.
+  static const double configGoalieSaveRadiusMultiplier = 0.90;
 
   // Error de predicción en píxeles: a mayor error, el arquero se tira más desviado de la trayectoria real.
-  static const double configGoaliePredictionErrorX = 40.0;
-  static const double configGoaliePredictionErrorY = 25.0;
+  static const double configGoaliePredictionErrorX = 75.0;
+  static const double configGoaliePredictionErrorY = 45.0;
+  static const double _physicsReferenceFps = 60.0;
+  static const double _minShotSpeedFactor = 0.6;
+  static const double _maxShotSpeedFactor = 1.8;
+  static const double _baseBallDepthVelocity = 0.030 * _physicsReferenceFps;
+  static const double _ballGravity =
+      0.30 * _physicsReferenceFps * _physicsReferenceFps;
 
   @override
   Color backgroundColor() => Colors.transparent;
@@ -130,6 +131,9 @@ class PenaltyGame extends FlameGame {
   ui.Image? goalSprite;
   ui.Image? pitchSprite;
   ui.Image? goalieSprite;
+  ui.Picture? _staticStadiumPicture;
+  List<ui.Picture>? _celebrationPictures;
+  static const int _numCelebrationFrames = 8;
 
   // Callbacks para comunicar con la interfaz Flutter
   final Function(int score, int attempts) onProgressUpdate;
@@ -218,19 +222,20 @@ class PenaltyGame extends FlameGame {
       final double swipeSpeed = vector.distance / elapsedSeconds;
 
       // Escalar factor de velocidad (velocidad base de referencia: ~1200 px/seg)
-      final double speedFactor = (swipeSpeed / 1200.0).clamp(0.5, 2.2);
+      final double speedFactor = (swipeSpeed / 1200.0).clamp(
+        _minShotSpeedFactor,
+        _maxShotSpeedFactor,
+      );
 
-      // Calcular físicas de trayectoria 2.5D dinámicas basadas en la velocidad del arrastre
-      final double baseVz = 0.038;
-      ballVz = baseVz * speedFactor; // Velocidad de alejamiento dinámica
-
-      final double N = 1.0 / ballVz;
+      // Calcular físicas 2.5D en segundos para que el tiro no dependa del FPS.
+      ballVz = _baseBallDepthVelocity * speedFactor;
+      final double flightDuration = 1.0 / ballVz;
       final double gravityCompensation =
-          0.30 * N * (N + 1) / 2; // Gravedad proporcional al tiempo de vuelo
+          0.5 * _ballGravity * flightDuration * flightDuration;
 
       // Mapear el tiro para que la bola llegue exactamente al punto de liberación (end.dx, end.dy)
-      ballVx = vector.dx / N;
-      ballVy = (vector.dy - gravityCompensation) / N;
+      ballVx = vector.dx / flightDuration;
+      ballVy = (vector.dy - gravityCompensation) / flightDuration;
       isKicked = true;
 
       // Simulación de predicción imperfecta del portero con error configurable
@@ -266,18 +271,37 @@ class PenaltyGame extends FlameGame {
     }
 
     if (isKicked) {
+      final double stepDt = dt.clamp(0.0, 0.3).toDouble();
+      final double previousBallX = ballX;
+      final double previousBallY = ballY;
+      final double previousBallZ = ballZ;
+
       // Actualizar física del balón (2.5D)
-      ballX += ballVx;
-      ballY += ballVy;
-      ballZ += ballVz;
-      ballVy += 0.30; // Gravedad artificial
+      ballX += ballVx * stepDt;
+      ballY += ballVy * stepDt + 0.5 * _ballGravity * stepDt * stepDt;
+      ballZ += ballVz * stepDt;
+      ballVy += _ballGravity * stepDt;
 
       // Movimiento del arquero utilizando la agilidad configurada
-      goalieX = goalieX + (goalieTargetX - goalieX) * configGoalieAgility;
-      goalieY = goalieY + (goalieTargetY - goalieY) * configGoalieAgility;
+      final double goalieStep =
+          (1 - pow(1 - configGoalieAgility, stepDt * _physicsReferenceFps))
+              .toDouble();
+      goalieX = goalieX + (goalieTargetX - goalieX) * goalieStep;
+      goalieY = goalieY + (goalieTargetY - goalieY) * goalieStep;
 
       // Evaluar gol o atajada cuando el balón pasa la meta en Z = 1.0
       if (ballZ >= 1.0) {
+        final double zDelta = ballZ - previousBallZ;
+        if (zDelta > 0) {
+          final double hitProgress = ((1.0 - previousBallZ) / zDelta).clamp(
+            0.0,
+            1.0,
+          );
+          ballX = previousBallX + (ballX - previousBallX) * hitProgress;
+          ballY = previousBallY + (ballY - previousBallY) * hitProgress;
+          ballZ = 1.0;
+        }
+
         isKicked = false;
         evaluateShot();
       }
@@ -392,6 +416,52 @@ class PenaltyGame extends FlameGame {
   }
 
   void drawStadium(Canvas canvas) {
+    if (crowdState != 'celebrating') {
+      _staticStadiumPicture ??= _buildStaticStadiumPicture();
+      canvas.drawPicture(_staticStadiumPicture!);
+      return;
+    }
+
+    _buildCelebrationPictures();
+    final double tick = DateTime.now().millisecondsSinceEpoch / 1000.0;
+    final int frameIndex = ((tick * 12.0) % _numCelebrationFrames).toInt();
+    canvas.drawPicture(_celebrationPictures![frameIndex]);
+  }
+
+  ui.Picture _buildStaticStadiumPicture() {
+    final recorder = ui.PictureRecorder();
+    final pictureCanvas = Canvas(
+      recorder,
+      const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight),
+    );
+    _drawStadium(pictureCanvas, animateCrowd: false);
+    return recorder.endRecording();
+  }
+
+  void _buildCelebrationPictures() {
+    if (_celebrationPictures != null) return;
+    _celebrationPictures = [];
+    for (int i = 0; i < _numCelebrationFrames; i++) {
+      final recorder = ui.PictureRecorder();
+      final pictureCanvas = Canvas(
+        recorder,
+        const Rect.fromLTWH(0, 0, logicalWidth, logicalHeight),
+      );
+      final double simulatedTick = i * (2 * pi / _numCelebrationFrames) / 15.0;
+      _drawStadium(
+        pictureCanvas,
+        animateCrowd: true,
+        simulatedTick: simulatedTick,
+      );
+      _celebrationPictures!.add(recorder.endRecording());
+    }
+  }
+
+  void _drawStadium(
+    Canvas canvas, {
+    required bool animateCrowd,
+    double? simulatedTick,
+  }) {
     // Fondo grisáceo
     final bgPaint = Paint()..color = const Color(0xFFF0F2F5);
     canvas.drawRect(
@@ -411,8 +481,10 @@ class PenaltyGame extends FlameGame {
       ..color = const Color(0xFFCBD5E1)
       ..strokeWidth = 2;
 
-    final double tick = DateTime.now().millisecondsSinceEpoch / 1000.0;
-    final bool isCelebrating = (crowdState == 'celebrating');
+    final double tick =
+        simulatedTick ??
+        (animateCrowd ? DateTime.now().millisecondsSinceEpoch / 1000.0 : 0.0);
+    final bool isCelebrating = animateCrowd && (crowdState == 'celebrating');
 
     for (double y = 40.0; y < logicalHeight * 0.4; y += 30.0) {
       canvas.drawLine(Offset(0, y), Offset(logicalWidth, y), seatLinePaint);
@@ -574,9 +646,8 @@ class PenaltyGame extends FlameGame {
     // (dentro del ancho de los postes, visible a través de la malla de la red).
     final Rect billboardRect = this.billboardRect;
 
-    // Cortar un agujero transparente en el canvas para que se vea el video (detrás de la app)
-    final holePaint = Paint()..blendMode = BlendMode.clear;
-    canvas.drawRect(billboardRect, holePaint);
+    // Dibujar billboard publicitario directamente en el Canvas
+    _drawCanvasBillboard(canvas, billboardRect);
 
     // Césped (Cancha)
     if (pitchSprite != null) {
@@ -634,11 +705,19 @@ class PenaltyGame extends FlameGame {
     final double gBottom = goalBottom;
 
     if (goalSprite != null) {
+      final double widthRatio = goalSprite!.width / 1920.0;
+      final double heightRatio = goalSprite!.height / 1080.0;
+      final Rect sourceRect = Rect.fromLTRB(
+        _goalSpriteSourceLeft * widthRatio,
+        _goalSpriteSourceTop * heightRatio,
+        _goalSpriteSourceRight * widthRatio,
+        _goalSpriteSourceBottom * heightRatio,
+      );
       canvas.drawImageRect(
         goalSprite!,
-        _goalSpriteSourceRect,
+        sourceRect,
         _goalSpriteRect,
-        Paint()..filterQuality = FilterQuality.high,
+        Paint()..filterQuality = FilterQuality.medium,
       );
     } else {
       // Red de portería
@@ -843,5 +922,88 @@ class PenaltyGame extends FlameGame {
     }
 
     canvas.restore();
+  }
+
+  void _drawCanvasBillboard(Canvas canvas, Rect rect) {
+    // 1. Fondo de valla con gradiente Navy elegante de Banco del Austro
+    final bgPaint = Paint()
+      ..shader = ui.Gradient.linear(
+        rect.topLeft,
+        rect.bottomRight,
+        [const Color(0xFF00205B), const Color(0xFF001030)],
+      );
+    canvas.drawRect(rect, bgPaint);
+
+    // 2. Dibujar franjas decorativas sutiles en los extremos
+    final stripePaint = Paint()..color = const Color(0xFFE4002B); // Rojo BDA
+    canvas.drawRect(
+      Rect.fromLTWH(rect.left, rect.top, 8, rect.height),
+      stripePaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(rect.right - 8, rect.top, 8, rect.height),
+      stripePaint,
+    );
+
+    // 3. Brillo metálico animado (Sheen Effect)
+    // El brillo se desplaza de izquierda a derecha de forma periódica
+    final double time = DateTime.now().millisecondsSinceEpoch / 1000.0;
+    final double sheenPosition = (time * 150.0) % (rect.width * 2) - rect.width;
+
+    final sheenPaint = Paint()
+      ..shader = ui.Gradient.linear(
+        Offset(rect.left + sheenPosition, rect.top),
+        Offset(rect.left + sheenPosition + 120, rect.top),
+        [
+          Colors.transparent,
+          const Color(0xFFFFB81C).withValues(alpha: 0.15), // Oro suave
+          const Color(0xFFFFFFFF).withValues(alpha: 0.35), // Blanco de brillo
+          const Color(0xFFFFB81C).withValues(alpha: 0.15),
+          Colors.transparent,
+        ],
+        [0.0, 0.35, 0.5, 0.65, 1.0],
+      );
+    
+    // Guardar capa para recortar el brillo dentro de la valla
+    canvas.save();
+    canvas.clipRect(rect);
+    canvas.drawRect(rect, sheenPaint);
+    canvas.restore();
+
+    // 4. Borde Dorado
+    final borderPaint = Paint()
+      ..color = const Color(0xFFFFB81C) // Oro
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+    canvas.drawRect(rect, borderPaint);
+
+    // 5. Texto de Marca: BANCO DEL AUSTRO
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: 'BANCO DEL AUSTRO',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 4.5,
+          shadows: [
+            Shadow(
+              color: Colors.black45,
+              offset: Offset(1.5, 1.5),
+              blurRadius: 2.0,
+            ),
+          ],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    
+    // Centrar texto en la valla
+    final textOffset = Offset(
+      rect.left + (rect.width - textPainter.width) / 2,
+      rect.top + (rect.height - textPainter.height) / 2,
+    );
+    textPainter.paint(canvas, textOffset);
   }
 }

@@ -101,7 +101,7 @@ class _KioskFlowNavigatorState extends State<KioskFlowNavigator> {
   @override
   void initState() {
     super.initState();
-    _currentScreen = 'registration';
+    _currentScreen = 'menu';
     if (_currentScreen == 'menu') {
       _currentPlayer = PlayerLead(
         id: 'temp_kiosk_user',
