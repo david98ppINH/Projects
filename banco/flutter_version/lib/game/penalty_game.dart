@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import '../services/audio_service.dart';
 
 class PenaltyGame extends FlameGame {
   // Dimensiones lógicas fijas del canvas de quiosco
@@ -158,6 +159,9 @@ class PenaltyGame extends FlameGame {
 
     resetBall();
     resetGoalie();
+
+    // Play start whistle
+    AudioService().playSilbato();
   }
 
   void resetBall() {
@@ -301,15 +305,18 @@ class PenaltyGame extends FlameGame {
     if (!isShotInsideGoal) {
       // FUERA
       onMessageTrigger('¡FUERA!');
+      AudioService().playFalla();
     } else if (distToGoalie < collisionRadius) {
       // ATAJADA
       onMessageTrigger('¡ATAJADA!');
+      AudioService().playFalla();
     } else {
       // GOL
       score++;
       onMessageTrigger('¡GOLAZO!');
       crowdState = 'celebrating';
       crowdCelebrationTimer = 1.4; // 1.4 segundos de saltos y confetti
+      AudioService().playAplausos();
     }
 
     attempts++;

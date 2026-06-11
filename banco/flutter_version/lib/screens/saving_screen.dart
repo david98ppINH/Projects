@@ -20,81 +20,117 @@ class SavingScoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [BdaColors.lightBackground, BdaColors.white],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      color: BdaColors.sipyBackground,
       child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: Container(
+        child: Column(
+          children: [
+            Container(
+              height: 72,
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 34),
               decoration: BoxDecoration(
-                color: BdaColors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: const Border(
-                  top: BorderSide(color: BdaColors.gold, width: 6),
+                color: BdaColors.sipyHeaderBackground,
+                border: Border(
+                  bottom: BorderSide(
+                    color: BdaColors.sipyInputBorder.withValues(alpha: 0.3),
+                  ),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: BdaColors.navy.withValues(alpha: 0.12),
-                    blurRadius: 28,
-                    offset: const Offset(0, 14),
-                  ),
-                ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: CircularProgressIndicator(
-                      color: BdaColors.red,
-                      strokeWidth: 5,
-                    ),
-                  ),
-                  const SizedBox(height: 26),
-                  const Text(
-                    'GUARDANDO RESULTADO',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      color: BdaColors.navy,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _gameLabel,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: BdaColors.red,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Estamos registrando tu puntaje...',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
+              child: Center(
+                child: Image.asset(
+                  BdaAssets.sippyLogo,
+                  width: 94,
+                  height: 47,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 36),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 40,
+                    ),
+                    decoration: BoxDecoration(
+                      color: BdaColors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: const Border(
+                        top: BorderSide(
+                          color: BdaColors.sipyOptionGreen,
+                          width: 6,
+                        ),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: BdaColors.sipyShadowBlue.withValues(
+                            alpha: 0.15,
+                          ),
+                          blurRadius: 40,
+                          spreadRadius: -10,
+                          offset: const Offset(0, 14),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(
+                          width: 54,
+                          height: 54,
+                          child: CircularProgressIndicator(
+                            color: BdaColors.sipyBlue,
+                            strokeWidth: 5,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        const Text(
+                          'GUARDANDO RESULTADO',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: BdaFonts.gotham,
+                            fontSize: 25,
+                            fontWeight: FontWeight.w900,
+                            color: BdaColors.sipyBlue,
+                            letterSpacing: -0.6,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          _gameLabel,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: BdaFonts.gotham,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: BdaColors.sipyDarkText,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Estamos registrando tu puntaje...',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: BdaFonts.gotham,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w400,
+                            color: BdaColors.sipyBodyText.withValues(
+                              alpha: 0.8,
+                            ),
+                            height: 1.25,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

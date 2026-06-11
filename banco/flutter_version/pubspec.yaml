@@ -35,6 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flame: ^1.37.0
+  audioplayers: ^6.7.1
   shared_preferences: ^2.5.5
   webview_flutter: ^4.13.1
   video_player: ^2.11.1
@@ -65,10 +66,13 @@ flutter:
 
   assets:
     - assets/animacion.mp4
+    - assets/animacion_bda.mp4
     - assets/Pelota.webp
     - assets/arco.webp
     - assets/chancha.webp
     - assets/Jugador.webp
+    - assets/sippy.png
+    - assets/audio/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -81,12 +85,13 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: Gotham
+      fonts:
+        - asset: assets/fonts/Gotham.ttf
+          weight: 400
+        - asset: assets/fonts/GothamBold.ttf
+          weight: 700
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

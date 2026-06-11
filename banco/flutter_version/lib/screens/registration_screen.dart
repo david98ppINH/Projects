@@ -1,8 +1,11 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
 import '../models/player_lead.dart';
 import '../services/local_storage_service.dart';
 import '../theme/bda_theme.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final Function(PlayerLead) onRegister;
@@ -28,17 +31,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       });
 
       String docId = 'lead_${DateTime.now().millisecondsSinceEpoch}';
-      
-      try {
-        final docRef = await FirebaseFirestore.instance.collection('jugadores').add({
-          'nombre': _nameController.text.trim(),
-          'correo': _emailController.text.trim(),
-          'fechaRegistro': FieldValue.serverTimestamp(),
-        });
-        docId = docRef.id;
-      } catch (e) {
-        debugPrint('Firebase save error: $e');
-      }
 
       final lead = PlayerLead(
         id: docId,
@@ -51,14 +43,32 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         timestamp: DateTime.now().toIso8601String(),
       );
 
-      LocalStorageService().saveLead(lead).then((_) {
-        if (mounted) {
-          widget.onRegister(lead);
-          setState(() {
-            _isLoading = false;
+      unawaited(_saveLeadInBackground(lead));
+
+      if (mounted) {
+        widget.onRegister(lead);
+      }
+    }
+  }
+
+  Future<void> _saveLeadInBackground(PlayerLead lead) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('jugadores')
+          .doc(lead.id)
+          .set({
+            'nombre': lead.firstName,
+            'correo': lead.email,
+            'fechaRegistro': FieldValue.serverTimestamp(),
           });
-        }
-      });
+    } catch (e) {
+      debugPrint('Firebase save error: $e');
+    }
+
+    try {
+      await LocalStorageService().saveLead(lead);
+    } catch (e) {
+      debugPrint('Local save error: $e');
     }
   }
 
@@ -72,114 +82,113 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [BdaColors.lightBackground, BdaColors.white],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      color: BdaColors.sipyBackground,
       child: Stack(
         children: [
-          // Fondo decorativo
           Positioned(
-            top: -100,
-            right: -100,
+            top: -80,
+            right: -110,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 400,
+              height: 400,
               decoration: BoxDecoration(
-                color: BdaColors.gold.withValues(alpha: 0.08),
+                color: BdaColors.sipySoftGrey.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
             ),
           ),
           Positioned(
-            bottom: -50,
-            left: -50,
+            bottom: -170,
+            left: -110,
             child: Container(
-              width: 250,
-              height: 250,
+              width: 620,
+              height: 620,
               decoration: BoxDecoration(
-                color: BdaColors.navy.withValues(alpha: 0.04),
+                color: BdaColors.sipyBlue.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
             ),
           ),
-          
+
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 60),
-                // Cabecera / Logotipo
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  height: 72,
+                  width: double.infinity,
                   decoration: BoxDecoration(
-                    color: BdaColors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: BdaColors.lightGrey),
+                    color: BdaColors.sipyHeaderBackground,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: BdaColors.sipyInputBorder.withValues(alpha: 0.3),
+                      ),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: BdaColors.navy.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 1,
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),
-                  child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                        fontFamily: 'Assistant',
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
-                      children: [
-                        TextSpan(text: 'BANCO DEL ', style: TextStyle(color: BdaColors.navy)),
-                        TextSpan(text: 'AUSTRO', style: TextStyle(color: BdaColors.red)),
-                      ],
+                  child: Center(
+                    child: Image.asset(
+                      BdaAssets.sippyLogo,
+                      width: 94,
+                      height: 47,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const Spacer(flex: 2),
                 const Text(
                   'MUNDIAL FAN FEST',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontFamily: BdaFonts.gotham,
+                    fontSize: 44,
                     fontWeight: FontWeight.w900,
-                    color: BdaColors.navy,
-                    letterSpacing: 2,
+                    color: BdaColors.sipyBlue,
+                    letterSpacing: -2.8,
+                    height: 1.05,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 const Text(
                   'Registra tus datos, juega y gana',
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey,
+                    fontFamily: BdaFonts.gotham,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w400,
+                    color: BdaColors.sipyBodyText,
+                    height: 1.3,
                   ),
                 ),
-                
-                // Formulario
+
                 Expanded(
+                  flex: 7,
                   child: Center(
                     child: SingleChildScrollView(
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Container(
-                        padding: const EdgeInsets.all(28),
+                        padding: const EdgeInsets.fromLTRB(42, 46, 42, 62),
                         decoration: BoxDecoration(
-                          color: BdaColors.white,
-                          borderRadius: BorderRadius.circular(24),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                           border: const Border(
-                            top: BorderSide(color: BdaColors.red, width: 6),
+                            top: BorderSide(
+                              color: BdaColors.sipyGreen,
+                              width: 5,
+                            ),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: BdaColors.navy.withValues(alpha: 0.12),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
+                              color: BdaColors.sipyShadowBlue.withValues(
+                                alpha: 0.15,
+                              ),
+                              blurRadius: 40,
+                              spreadRadius: -10,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
@@ -189,20 +198,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              TextFormField(
+                              _buildFieldLabel('NOMBRE'),
+                              const SizedBox(height: 12),
+                              _buildTextField(
                                 controller: _nameController,
-                                decoration: InputDecoration(
-                                  labelText: 'Nombre',
-                                  labelStyle: const TextStyle(color: BdaColors.navy),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(color: BdaColors.navy, width: 2),
-                                  ),
-                                  prefixIcon: const Icon(Icons.person, color: BdaColors.navy),
-                                ),
+                                hintText: 'Nombre',
+                                icon: Icons.person_outline,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
                                     return 'Por favor ingresa tu nombre';
@@ -210,54 +211,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 20),
-                              TextFormField(
+                              const SizedBox(height: 28),
+                              _buildFieldLabel('CORREO ELECTRÓNICO'),
+                              const SizedBox(height: 12),
+                              _buildTextField(
                                 controller: _emailController,
-                                decoration: InputDecoration(
-                                  labelText: 'Correo Electrónico',
-                                  labelStyle: const TextStyle(color: BdaColors.navy),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(color: BdaColors.navy, width: 2),
-                                  ),
-                                  prefixIcon: const Icon(Icons.email, color: BdaColors.navy),
-                                ),
+                                hintText: 'Correo Electrónico',
+                                icon: Icons.mail_outline,
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
                                     return 'Por favor ingresa tu correo';
                                   }
-                                  if (!RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
+                                  if (!RegExp(
+                                    r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                  ).hasMatch(value)) {
                                     return 'Ingresa un correo válido';
                                   }
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 32),
+                              const SizedBox(height: 40),
                               SizedBox(
-                                height: 54,
+                                height: 70,
                                 child: ElevatedButton(
                                   onPressed: _isLoading ? null : _submitForm,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: BdaColors.navy,
-                                    disabledBackgroundColor: BdaColors.navy.withValues(alpha: 0.7),
+                                    backgroundColor: BdaColors.sipyGreen,
+                                    disabledBackgroundColor: BdaColors.sipyGreen
+                                        .withValues(alpha: 0.65),
+                                    foregroundColor: BdaColors.sipyBlue,
+                                    elevation: 0,
+                                    shadowColor: Colors.transparent,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(35),
                                     ),
-                                    elevation: _isLoading ? 0 : 5,
                                   ),
                                   child: _isLoading
-                                      ? Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: const [
+                                      ? const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
                                             SizedBox(
                                               width: 24,
                                               height: 24,
                                               child: CircularProgressIndicator(
-                                                color: Colors.white,
+                                                color: BdaColors.sipyBlue,
                                                 strokeWidth: 3,
                                               ),
                                             ),
@@ -265,20 +264,41 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                             Text(
                                               'CARGANDO...',
                                               style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
+                                                fontFamily: BdaFonts.gotham,
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w800,
+                                                color: BdaColors.sipyBlue,
+                                                letterSpacing: -1.2,
                                               ),
                                             ),
                                           ],
                                         )
-                                      : const Text(
-                                          'JUGAR AHORA',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
+                                      : const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'JUGAR',
+                                              style: TextStyle(
+                                                fontFamily: BdaFonts.gotham,
+                                                fontSize: 28,
+                                                fontWeight: FontWeight.w900,
+                                                color: BdaColors.sipyBlue,
+                                                letterSpacing: -1.6,
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              'AHORA',
+                                              style: TextStyle(
+                                                fontFamily: BdaFonts.gotham,
+                                                fontSize: 28,
+                                                fontWeight: FontWeight.w900,
+                                                color: BdaColors.sipyBlue,
+                                                letterSpacing: -1.6,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                 ),
                               ),
@@ -294,6 +314,80 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFieldLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: BdaFonts.gotham,
+          color: BdaColors.sipyMutedText,
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 2.2,
+          height: 1,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    required String? Function(String?) validator,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(
+        fontFamily: BdaFonts.gotham,
+        color: BdaColors.sipyBodyText,
+        fontSize: 22,
+        fontWeight: FontWeight.w400,
+      ),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: BdaColors.sipyInputFill,
+        hintText: hintText,
+        hintStyle: const TextStyle(
+          fontFamily: BdaFonts.gotham,
+          color: BdaColors.sipyHintText,
+          fontSize: 22,
+          fontWeight: FontWeight.w400,
+        ),
+        prefixIcon: Icon(icon, color: BdaColors.sipyBlue, size: 28),
+        prefixIconConstraints: const BoxConstraints(minWidth: 64),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 22,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: BdaColors.sipyInputBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: BdaColors.sipyInputBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: BdaColors.sipyBlue, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: BdaColors.red),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: BdaColors.red, width: 1.5),
+        ),
+      ),
+      validator: validator,
     );
   }
 }
