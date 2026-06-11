@@ -96,7 +96,7 @@ class _GameScreenState extends State<GameScreen>
   void _initTrivia() {
     final rand = Random();
     _triviaQuestions = List.from(triviaQuestions)..shuffle(rand);
-    _triviaQuestions = _triviaQuestions.take(10).toList();
+    _triviaQuestions = _triviaQuestions.take(5).toList();
     _loadTriviaQuestion();
 
     // Play start whistle

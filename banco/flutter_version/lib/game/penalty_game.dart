@@ -96,14 +96,14 @@ class PenaltyGame extends FlameGame {
   // CONFIGURACIÓN DE DIFICULTAD Y FÍSICAS (Ajustado)
   // ==========================================
   // Agilidad del arquero: menor = más lento, mayor = más rápido.
-  static const double configGoalieAgility = 0.15;
+  static const double configGoalieAgility = 0.08;
 
   // Multiplicador de radio de atajada: menor = requiere más precisión del arquero para atajar.
-  static const double configGoalieSaveRadiusMultiplier = 1.15;
+  static const double configGoalieSaveRadiusMultiplier = 0.90;
 
   // Error de predicción en píxeles: a mayor error, el arquero se tira más desviado de la trayectoria real.
-  static const double configGoaliePredictionErrorX = 60.0;
-  static const double configGoaliePredictionErrorY = 35.0;
+  static const double configGoaliePredictionErrorX = 75.0;
+  static const double configGoaliePredictionErrorY = 45.0;
 
   // Constantes físicas independientes de FPS
   static const double _physicsReferenceFps = 60.0;
